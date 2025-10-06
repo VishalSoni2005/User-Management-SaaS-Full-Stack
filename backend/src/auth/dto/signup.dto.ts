@@ -9,7 +9,11 @@ import {
 export class AuthDto {
   @IsString()
   @MinLength(3)
-  name: string;
+  firstName: string;
+
+  @IsString()
+  @MinLength(3)
+  lastName: string;
 
   @IsEmail()
   @IsNotEmpty()
@@ -19,5 +23,9 @@ export class AuthDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  role: string;
 }
 // interface is implemented

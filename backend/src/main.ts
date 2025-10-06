@@ -2,7 +2,6 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 
-const port = process.env.PORT || 3001;
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -14,18 +13,14 @@ async function bootstrap() {
     }),
   );
 
-  const portToTry = [port, 3000, 3002, 3003, 3004];
+  app.enableCors({
+    origin: 'http://localhost:3000', // explicitly allow Next.js dev server
+    credentials: true, // allow cookies / auth headers if needed
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  });
 
-  for (const p of portToTry) {
-    try {
-      await app.listen(p);
-      console.log(`App is running on port ${p}`);
-      break; // Exit the loop if the server starts successfully
-    } catch (error) {
-      console.error('Error starting server:', error);
-      throw error; // rethrow if it's a different error
-    }
-  }
-  // console.log(`App is running on port ${port}`);
+  const port = process.env.PORT || 4000;
+  await app.listen(port);
+  console.log(`App is running on port ${port}`);
 }
 bootstrap();
