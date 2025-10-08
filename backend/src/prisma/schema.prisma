@@ -19,7 +19,7 @@ model User {
   
   refreshToken String?
 
-  firstName    String?
+  firstName    String
   lastName     String?
 
   bookmarks    Bookmark[]

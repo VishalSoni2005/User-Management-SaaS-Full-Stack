@@ -1,21 +1,29 @@
-// the module file is class anotated with @module decorator
-
 import { Module } from '@nestjs/common';
-import { AuthControllers } from './auth.controller';
 import { AuthService } from './auth.service';
+import { AuthControllers } from './auth.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from '../common/strategy';
+import { JwtStrategy } from 'src/common/strategy';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     PrismaModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET || 'vishal',
+
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.get<string>('JWT_ACCESS_SECRET'),
+        signOptions: {
+          expiresIn: config.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m',
+        },
+      }),
     }),
   ],
+
   providers: [AuthService, JwtStrategy],
   controllers: [AuthControllers],
-  exports: [],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

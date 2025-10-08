@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { AuthDto } from './dto';
+import { Signup, LoginDto } from './dto';
 import * as argon2 from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
@@ -18,27 +18,109 @@ export class AuthService {
     private config: ConfigService,
   ) {}
 
-  // Create user and return tokens
-  async signup(dto: AuthDto) {
+  private async getTokens(
+    userId: string,
+    email: string,
+    role: string,
+    firstName: string,
+    lastName?: string | null,
+  ) {
+    // step 1: getting secrets
+    const accessSecret = this.config.get<string>('JWT_ACCESS_SECRET');
+    const refreshSecret = this.config.get<string>('JWT_REFRESH_SECRET');
+
+    if (!accessSecret || !refreshSecret) {
+      throw new Error('JWT secrets not configured');
+    }
+
+    //? step 2: payload
+    const payload = {
+      userId: userId,
+      email: email,
+      role: role,
+      firstName: firstName,
+      lastName: lastName,
+    };
+
+    //* step 3: accesstoken and refreshtoken
+    const accessToken = await this.jwt.signAsync(payload, {
+      //! access token have payload
+      secret: accessSecret,
+      expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m',
+    });
+
+    const refreshToken = await this.jwt.signAsync(
+      { sub: userId }, //! refresh token doesn't have payload
+      {
+        secret: refreshSecret,
+        expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
+      },
+    );
+
+    return { accessToken, refreshToken };
+  }
+
+  private async updateRefreshToken(userId: string, refreshToken: string) {
+    const hashed = await argon2.hash(refreshToken);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken: hashed },
+    });
+  }
+
+  async refreshTokens(userId: string, refreshToken: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.refreshToken)
+      throw new ForbiddenException('Access denied');
+
+    const isValid = await argon2.verify(user.refreshToken, refreshToken);
+    if (!isValid) throw new ForbiddenException('Invalid refresh token');
+
+    const tokens = await this.getTokens(
+      user.id,
+      user.email,
+      user.role,
+      user.firstName,
+      user.lastName,
+    );
+    await this.updateRefreshToken(user.id, tokens.refreshToken);
+
+    return {
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken,
+    };
+  }
+
+  async signup(dto: Signup) {
     try {
       const hash = await argon2.hash(dto.password);
 
       const user = await this.prisma.user.create({
         data: {
-          email: dto.email,
-          hash,
           firstName: dto.firstName,
+          lastName: dto.lastName,
+          email: dto.email,
+          role: dto.role === 'ADMIN' ? 'ADMIN' : 'USER',
+
+          hash: hash,
         },
         select: {
           id: true,
           email: true,
           firstName: true,
+          lastName: true,
           role: true,
           createdAt: true,
         },
       });
 
-      const tokens = await this.getTokens(user.id, user.email, user.role);
+      const tokens = await this.getTokens(
+        user.id,
+        user.email,
+        user.role,
+        user.firstName,
+        user.lastName,
+      );
       // store hashed refresh token
       await this.updateRefreshToken(user.id, tokens.refreshToken);
 
@@ -58,17 +140,28 @@ export class AuthService {
     }
   }
 
-  // Signin user, return tokens
-  async signin(dto: AuthDto) {
+  async login(dto: LoginDto) {
+    // console.log('dto from service layer', dto);
+
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
     if (!user) throw new NotFoundException('User not found');
 
+    console.log('user found ahe', user);
+
     const pwMatches = await argon2.verify(user.hash, dto.password);
     if (!pwMatches) throw new ForbiddenException('Invalid credentials');
 
-    const tokens = await this.getTokens(user.id, user.email, user.role);
+    console.log('password matches');
+
+    const tokens = await this.getTokens(
+      user.id,
+      user.email,
+      user.role,
+      user.firstName,
+      user.lastName,
+    );
     await this.updateRefreshToken(user.id, tokens.refreshToken);
 
     // return minimal user info and tokens
@@ -87,66 +180,12 @@ export class AuthService {
     };
   }
 
-  // Verify refresh token and rotate
-  async refreshTokens(userId: string, refreshToken: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user || !user.refreshToken)
-      throw new ForbiddenException('Access denied');
-
-    const isValid = await argon2.verify(user.refreshToken, refreshToken);
-    if (!isValid) throw new ForbiddenException('Invalid refresh token');
-
-    const tokens = await this.getTokens(user.id, user.email, user.role);
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
-
-    return {
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
-    };
-  }
-
   async logout(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
       data: { refreshToken: null },
     });
     return { success: true };
-  }
-
-  // generate access + refresh tokens
-  private async getTokens(userId: string, email: string, role: string) {
-    const accessSecret = this.config.get<string>('JWT_ACCESS_SECRET');
-    const refreshSecret = this.config.get<string>('JWT_REFRESH_SECRET');
-
-    if (!accessSecret || !refreshSecret) {
-      throw new Error('JWT secrets not configured');
-    }
-
-    const payload = { sub: userId, email, role };
-
-    const accessToken = await this.jwt.signAsync(payload, {
-      secret: accessSecret,
-      expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m',
-    });
-
-    const refreshToken = await this.jwt.signAsync(
-      { sub: userId },
-      {
-        secret: refreshSecret,
-        expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
-      },
-    );
-
-    return { accessToken, refreshToken };
-  }
-
-  // store hashed refresh token
-  private async updateRefreshToken(userId: string, refreshToken: string) {
-    const hashed = await argon2.hash(refreshToken);
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken: hashed },
-    });
   }
 }
 

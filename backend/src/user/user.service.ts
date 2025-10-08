@@ -17,11 +17,12 @@ export class UsersService {
       const hash = await argon2.hash(createDto.password);
       const user = await this.prisma.user.create({
         data: {
-          email: createDto.email,
-          hash,
-          firstName: createDto.firstName,
+          firstName: createDto.firstName!,
           lastName: createDto.lastName,
-          role: createDto.role ?? 'USER',
+          email: createDto.email,
+          role: createDto.role,
+
+          hash,
         },
         select: {
           id: true,
@@ -42,60 +43,18 @@ export class UsersService {
     }
   }
 
-  // Admin list: pagination, search, filter by role, sort
-  async findAll(params: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    role?: string;
-    sort?: string;
-  }) {
-    const page = Math.max(params.page ?? 1, 1);
-    const limit = Math.min(Math.max(params.limit ?? 10, 1), 100);
-    const skip = (page - 1) * limit;
-
-    const where: any = {};
-    if (params.search) {
-      where.OR = [
-        { email: { contains: params.search, mode: 'insensitive' } },
-        { firstName: { contains: params.search, mode: 'insensitive' } },
-        { lastName: { contains: params.search, mode: 'insensitive' } },
-      ];
-    }
-    if (params.role) where.role = params.role;
-
-    let orderBy: any = { createdAt: 'desc' };
-    if (params.sort) {
-      const [field, dir] = params.sort.split(':');
-      orderBy = { [field]: dir === 'desc' ? 'desc' : 'asc' };
-    }
-
-    const [items, total] = await Promise.all([
-      this.prisma.user.findMany({
-        where,
-        orderBy,
-        skip,
-        take: limit,
-        select: {
-          id: true,
-          email: true,
-          firstName: true,
-          lastName: true,
-          role: true,
-          createdAt: true,
-          updatedAt: true,
-        },
-      }),
-      this.prisma.user.count({ where }),
-    ]);
-
-    return {
-      items,
-      total,
-      page,
-      pages: Math.ceil(total / limit),
-      limit,
-    };
+  async findAll() {
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
   }
 
   async findOneById(id: string) {
@@ -114,6 +73,75 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
     return user;
   }
+
+  // Admin list: pagination, search, filter by role, sort
+  // async findAll(params: {
+  //   page?: number;
+  //   limit?: number;
+  //   search?: string;
+  //   role?: string;
+  //   sort?: string;
+  // }) {
+  //   const page = Math.max(params.page ?? 1, 1);
+  //   const limit = Math.min(Math.max(params.limit ?? 10, 1), 100);
+  //   const skip = (page - 1) * limit;
+
+  //   const where: any = {};
+  //   if (params.search) {
+  //     where.OR = [
+  //       { email: { contains: params.search, mode: 'insensitive' } },
+  //       { firstName: { contains: params.search, mode: 'insensitive' } },
+  //       { lastName: { contains: params.search, mode: 'insensitive' } },
+  //     ];
+  //   }
+  //   if (params.role) where.role = params.role;
+
+  //   let orderBy: any = { createdAt: 'desc' };
+  //   if (params.sort) {
+  //     const [field, dir] = params.sort.split(':');
+  //     orderBy = { [field]: dir === 'desc' ? 'desc' : 'asc' };
+  //   }
+
+  //   const [items, total] = await Promise.all([
+  //     this.prisma.user.findMany({
+  //       where,
+  //       orderBy,
+  //       skip,
+  //       take: limit,
+  //       select: {
+  //         id: true,
+  //         email: true,
+  //         firstName: true,
+  //         lastName: true,
+  //         role: true,
+  //         createdAt: true,
+  //         updatedAt: true,
+  //       },
+  //     }),
+  //     this.prisma.user.count({ where }),
+  //   ]);
+
+  //   return {
+  //     items,
+  //     total,
+  //     page,
+  //     pages: Math.ceil(total / limit),
+  //     limit,
+  //   };
+  // }
+  // findOneById(id: string) {
+  //   return this.prisma.user.findUnique({
+  //     where: { id },
+  //     select: {
+  //       id: true,
+  //       firstName: true,
+  //       lastName: true,
+  //       email: true,
+  //       role: true,
+  //       createdAt: true,
+  //     },
+  //   });
+  // }
 
   async updateById(id: string, dto: UpdateUserDto) {
     const exists = await this.prisma.user.findUnique({ where: { id } });
