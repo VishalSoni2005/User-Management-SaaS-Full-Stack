@@ -5,6 +5,7 @@ import { BookmarkModule } from './bookmark/bookmark.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
+import { AppLoggerModule } from './app-logger/app-logger.module';
 
 @Module({
   imports: [
@@ -12,6 +13,18 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
     UsersModule,
     BookmarkModule,
     PrismaModule,
+
+    //! Logger Module
+    AppLoggerModule.forRoot({
+      level: process.env.LOG_LEVEL || 'debug',
+      timestamp: true,
+      colorize: true,
+      fileTransport: process.env.NODE_ENV === 'production',
+      logFile: 'application.log',
+      errorFile: 'errors.log',
+    }),
+
+    //! Config
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -19,6 +32,8 @@ import { LoggerMiddleware } from './common/middleware/logger.middleware';
   controllers: [],
   providers: [],
 })
+
+//! Middleware
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(LoggerMiddleware).forRoutes('*');

@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import cookieParser from 'cookie-parser';
+
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
@@ -12,6 +15,8 @@ async function bootstrap() {
       transform: true, // transforms payloads to DTO instances
     }),
   );
+  // app.use(cookieParser());
+  app.use(cookieParser());
 
   app.enableCors({
     origin: 'http://localhost:3000', // explicitly allow Next.js dev server
@@ -24,3 +29,5 @@ async function bootstrap() {
   console.log(`App is running on port ${port}`);
 }
 bootstrap();
+
+// somewhere in your initialization file

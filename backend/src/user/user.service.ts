@@ -7,6 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as argon2 from 'argon2';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { log } from 'node:console';
 
 @Injectable()
 export class UsersService {
@@ -44,17 +45,23 @@ export class UsersService {
   }
 
   async findAll() {
-    return this.prisma.user.findMany({
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    try {
+      const hlo = this.prisma.user.findMany({
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+      console.log('[userService] findall services called', hlo); // --- IGNORE ---
+      return hlo;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async findOneById(id: string) {
@@ -70,7 +77,10 @@ export class UsersService {
         updatedAt: true,
       },
     });
+
     if (!user) throw new NotFoundException('User not found');
+    console.log('findonebyid services called'); // --- IGNORE ---
+
     return user;
   }
 

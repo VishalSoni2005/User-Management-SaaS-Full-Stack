@@ -15,6 +15,7 @@ import { UsersService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/common/guard';
+import { IdDto } from 'src/common/dtos/id.dto';
 
 @Controller('users')
 // @UseGuards(JwtAuthGuard)
@@ -27,19 +28,14 @@ export class UsersController {
   }
 
   @Get()
-  async findAll() {
-    return this.usersService.findAll();
-    // console.log('req of user content =>', req.user);
-    // const auth = req.user;
-
-    // if (auth.role === 'ADMIN') {
-    // return this.usersService.findAll();
-    // } else {
-    //   return this.usersService.findOneById(auth.userId);
-    // }
+  async findAll(@Req() req: Request) {
+    try {
+      return this.usersService.findAll();
+    } catch (error) {
+      console.log(' error in findAll controller', error);
+    }
   }
 
-  // Get profile (self) or admin get any user
   @Get('me')
   async me(@Req() req: any) {
     const userId = req.user.userId; // provide userid
@@ -47,12 +43,8 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @Req() req: any) {
-    // const auth = req.user;
-    // if (auth.role !== 'ADMIN' && auth.userId !== id) {
-    //   return { statusCode: 403, message: 'Forbidden' };
-    // }
-    return this.usersService.findOneById(id);
+  async findOne(@Param() param: IdDto, @Req() req: any) {
+    return this.usersService.findOneById(param.id);
   }
 
   @Put(':id')
