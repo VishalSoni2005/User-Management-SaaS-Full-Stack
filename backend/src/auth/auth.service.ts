@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Injectable,
   ForbiddenException,
@@ -10,8 +9,9 @@ import * as argon2 from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { AppLoggerService } from 'src/app-logger';
+// import { AppLoggerService } from 'src/app-logger';
 import { Response } from 'express';
+import { AppLoggerService } from 'src/app-logger/app-logger.service';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +21,7 @@ export class AuthService {
     private config: ConfigService,
     private readonly logger: AppLoggerService,
   ) {
-    this.logger.setContext(AuthService.name);
+    // this.logger.setContext(AuthService.name);
   }
   private parseExpiryToMs(exp: string) {
     // simple parser for formats like '900s', '15m', '7d'
@@ -61,6 +61,8 @@ export class AuthService {
     // step 1: getting secrets
     const accessSecret = this.config.get<string>('JWT_ACCESS_SECRET');
     const refreshSecret = this.config.get<string>('JWT_REFRESH_SECRET');
+
+    console.log(AuthService.name);
 
     if (!accessSecret || !refreshSecret) {
       throw new Error('JWT secrets not configured');
@@ -172,7 +174,6 @@ export class AuthService {
       this.logger.error(
         'Error during signup',
         error instanceof Error ? error.stack : '',
-        AuthService.name,
       );
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -185,7 +186,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto, res: Response) {
-    this.logger.log(`Login attempt for email: ${dto.email}`);
+    this.logger.debug(`Login attempt for email: ${dto.email}`);
     try {
       const user = await this.prisma.user.findUnique({
         where: { email: dto.email },
@@ -230,14 +231,13 @@ export class AuthService {
       this.logger.error(
         'Error during login',
         error instanceof Error ? error.stack : '',
-        AuthService.name,
       );
       throw error;
     }
   }
 
   async logout(refresh_token: string) {
-    this.logger.log(`Logout attempt for user ID: ${refresh_token}`);
+    this.logger.info(`Logout attempt for user ID: ${refresh_token}`);
     try {
       const payload = await this.jwt.verifyAsync(refresh_token, {
         secret: this.config.get<string>('JWT_REFRESH_SECRET'),
@@ -247,16 +247,12 @@ export class AuthService {
         throw new ForbiddenException('Invalid token payload');
       }
 
-      // console.log('Payload from refresh token:', payload);
-
       const userId = payload.sub;
       // Find user by refresh token
 
       const user = await this.prisma.user.findFirst({
         where: { id: userId, refreshToken: { not: null } },
       });
-
-      // console.log('user', user);
 
       if (!user) throw new NotFoundException('User not found');
 
@@ -270,7 +266,6 @@ export class AuthService {
       this.logger.error(
         'Error during logout',
         error instanceof Error ? error.stack : '',
-        AuthService.name,
       );
       throw error;
     }

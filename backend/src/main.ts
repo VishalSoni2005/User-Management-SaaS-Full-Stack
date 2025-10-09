@@ -4,10 +4,18 @@ import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
 import { ValidationPipe } from '@nestjs/common';
+// import { Logger } from 'pino-nestjs';
+import { AppLoggerService } from './app-logger/app-logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    // logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    bufferLogs: true,
+  });
+  const appLogger = app.get(AppLoggerService);
+  app.useLogger(appLogger);
 
+  appLogger.log('🚀 Application starting...');
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true, // strips properties that are not in the DTO
@@ -17,6 +25,8 @@ async function bootstrap() {
   );
   // app.use(cookieParser());
   app.use(cookieParser());
+
+  console.log(bootstrap.name);
 
   app.enableCors({
     origin: 'http://localhost:3000', // explicitly allow Next.js dev server

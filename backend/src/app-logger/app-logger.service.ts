@@ -1,153 +1,63 @@
-// src/app-logger/app-logger.service.ts - Alternative Version
-import { Injectable, Inject, Scope, Logger } from '@nestjs/common';
-import type { LoggerOptions } from './app-logger.constants';
-import { LOGGER_OPTIONS } from './app-logger.constants';
-import { IAppLogger, LogLevel } from './app-logger.interface';
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+import { Injectable, LoggerService } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import pino from 'pino';
+import { multistream } from 'pino-multi-stream';
 
-@Injectable({ scope: Scope.TRANSIENT })
-export class AppLoggerService implements IAppLogger {
-  private readonly logger: Logger;
-  private context = 'AppLogger';
+@Injectable()
+export class AppLoggerService implements LoggerService {
+  private readonly logger: pino.Logger;
 
-  constructor(@Inject(LOGGER_OPTIONS) private readonly options: LoggerOptions) {
-    this.logger = new Logger(this.context);
-    this.initializeFileTransports();
-  }
+  constructor() {
+    const logDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logDir)) fs.mkdirSync(logDir);
 
-  private logFileStream: fs.WriteStream;
-  private errorFileStream: fs.WriteStream;
-
-  private initializeFileTransports() {
-    if (this.options.fileTransport) {
-      const logsDir = path.join(process.cwd(), 'logs');
-
-      if (!fs.existsSync(logsDir)) {
-        fs.mkdirSync(logsDir, { recursive: true });
-      }
-
-      this.logFileStream = fs.createWriteStream(
-        path.join(logsDir, this.options.logFile || 'app.log'),
-        { flags: 'a' },
-      );
-      this.errorFileStream = fs.createWriteStream(
-        path.join(logsDir, this.options.errorFile || 'error.log'),
-        { flags: 'a' },
-      );
-    }
-  }
-
-  private shouldLog(level: LogLevel): boolean {
-    const levels = [
-      LogLevel.ERROR,
-      LogLevel.WARN,
-      LogLevel.LOG,
-      LogLevel.DEBUG,
-      LogLevel.VERBOSE,
-    ];
-    const currentLevelIndex = levels.indexOf(this.options.level as LogLevel);
-    const messageLevelIndex = levels.indexOf(level);
-
-    return messageLevelIndex <= currentLevelIndex;
-  }
-
-  private formatMessage(
-    level: string,
-    message: string,
-    context?: string,
-  ): string {
-    const timestamp =
-      this.options.timestamp !== false ? new Date().toISOString() : '';
-    const contextStr = context ? ` [${context}]` : '';
-    return `${timestamp} ${level.toUpperCase()}${contextStr}: ${message}`;
-  }
-
-  private writeToFile(level: string, formattedMessage: string) {
-    if (this.options.fileTransport) {
-      const stream =
-        level === 'error' ? this.errorFileStream : this.logFileStream;
-      if (stream) {
-        stream.write(formattedMessage + '\n');
-      }
-    }
-  }
-
-  log(message: string, context?: string, ...args: any[]) {
-    if (!this.shouldLog(LogLevel.LOG)) return;
-
-    const formattedMessage = this.formatMessage(
-      'log',
-      message,
-      context || this.context,
+    const logFilePath = path.join(
+      logDir,
+      `logs-${new Date().toISOString().split('T')[0]}.log`,
     );
-    this.logger.log(formattedMessage);
-    this.writeToFile('log', formattedMessage);
-  }
 
-  error(message: string, trace?: string, context?: string, ...args: any[]) {
-    if (!this.shouldLog(LogLevel.ERROR)) return;
+    const streams = multistream([
+      {
+        stream: pino.transport({
+          target: 'pino-pretty',
+          options: { colorize: true },
+        }),
+      },
+      { stream: fs.createWriteStream(logFilePath, { flags: 'a' }) },
+    ]);
 
-    const formattedMessage = this.formatMessage(
-      'error',
-      message,
-      context || this.context,
+    this.logger = pino(
+      {
+        level: process.env.LOG_LEVEL || 'trace', // All levels
+        timestamp: pino.stdTimeFunctions.isoTime,
+      },
+      streams,
     );
-    const fullMessage = trace
-      ? `${formattedMessage}\nTrace: ${trace}`
-      : formattedMessage;
-
-    this.logger.error(fullMessage);
-    this.writeToFile('error', fullMessage);
   }
 
-  warn(message: string, context?: string, ...args: any[]) {
-    if (!this.shouldLog(LogLevel.WARN)) return;
-
-    const formattedMessage = this.formatMessage(
-      'warn',
-      message,
-      context || this.context,
-    );
-    this.logger.warn(formattedMessage);
-    this.writeToFile('warn', formattedMessage);
+  info(message: string) {
+    this.logger.info(message);
   }
 
-  debug(message: string, context?: string, ...args: any[]) {
-    if (!this.shouldLog(LogLevel.DEBUG)) return;
-
-    const formattedMessage = this.formatMessage(
-      'debug',
-      message,
-      context || this.context,
-    );
-    this.logger.debug(formattedMessage);
-    this.writeToFile('debug', formattedMessage);
+  log(message: string) {
+    this.logger.info(message);
   }
 
-  verbose(message: string, context?: string, ...args: any[]) {
-    if (!this.shouldLog(LogLevel.VERBOSE)) return;
-
-    const formattedMessage = this.formatMessage(
-      'verbose',
-      message,
-      context || this.context,
-    );
-    this.logger.verbose(formattedMessage);
-    this.writeToFile('verbose', formattedMessage);
+  error(message: string, trace?: string) {
+    this.logger.error({ trace }, message);
   }
 
-  setContext(context: string) {
-    this.context = context;
-    return this;
+  warn(message: string) {
+    this.logger.warn(message);
   }
 
-  onApplicationShutdown() {
-    if (this.logFileStream) {
-      this.logFileStream.end();
-    }
-    if (this.errorFileStream) {
-      this.errorFileStream.end();
-    }
+  debug(message: string) {
+    this.logger.debug(message);
+  }
+
+  verbose(message: string) {
+    this.logger.trace(message);
   }
 }

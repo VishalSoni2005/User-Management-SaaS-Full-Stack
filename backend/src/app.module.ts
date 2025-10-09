@@ -6,6 +6,8 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AppLoggerModule } from './app-logger/app-logger.module';
+import { LoggerModule } from 'pino-nestjs';
+import { AppLoggerService } from './app-logger/app-logger.service';
 
 @Module({
   imports: [
@@ -13,16 +15,19 @@ import { AppLoggerModule } from './app-logger/app-logger.module';
     UsersModule,
     BookmarkModule,
     PrismaModule,
+    AppLoggerModule,
 
-    //! Logger Module
-    AppLoggerModule.forRoot({
-      level: process.env.LOG_LEVEL || 'debug',
-      timestamp: true,
-      colorize: true,
-      fileTransport: process.env.NODE_ENV === 'production',
-      logFile: 'application.log',
-      errorFile: 'errors.log',
-    }),
+    //! Pino Logger Module
+    // LoggerModule.forRoot(),
+    //! Custom Logger Module
+    // AppLoggerModule.forRoot({
+    //   level: process.env.LOG_LEVEL || 'debug',
+    //   timestamp: true,
+    //   colorize: true,
+    //   fileTransport: process.env.NODE_ENV === 'production',
+    //   logFile: 'application.log',
+    //   errorFile: 'errors.log',
+    // }),
 
     //! Config
     ConfigModule.forRoot({
@@ -30,7 +35,7 @@ import { AppLoggerModule } from './app-logger/app-logger.module';
     }),
   ],
   controllers: [],
-  providers: [],
+  providers: [AppLoggerService],
 })
 
 //! Middleware
