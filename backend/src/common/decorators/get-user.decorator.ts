@@ -5,6 +5,8 @@ export const GetUser = createParamDecorator(
   (data: string | undefined, ctx: ExecutionContext) => {
     const req = ctx.switchToHttp().getRequest();
     if (!req.user) return null;
+    console.log('User from GetUser decorator : ', req.user);
+
     return data ? req.user[data] : req.user;
   },
 );

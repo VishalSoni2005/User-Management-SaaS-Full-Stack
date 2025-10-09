@@ -7,7 +7,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as argon2 from 'argon2';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { log } from 'node:console';
 
 @Injectable()
 export class UsersService {
@@ -40,7 +39,7 @@ export class UsersService {
       if (error.code === 'P2002') {
         throw new BadRequestException('Email already in use');
       }
-      throw error;
+      throw new BadRequestException('Something went wrong');
     }
   }
 
@@ -60,28 +59,32 @@ export class UsersService {
       console.log('[userService] findall services called', hlo); // --- IGNORE ---
       return hlo;
     } catch (error) {
-      console.log(error);
+      throw new NotFoundException('No users found');
     }
   }
 
   async findOneById(id: string) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
 
-    if (!user) throw new NotFoundException('User not found');
-    console.log('findonebyid services called'); // --- IGNORE ---
+      if (!user) throw new NotFoundException('User not found');
+      console.log('findonebyid services called'); // --- IGNORE ---
 
-    return user;
+      return user;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   // Admin list: pagination, search, filter by role, sort
@@ -154,35 +157,47 @@ export class UsersService {
   // }
 
   async updateById(id: string, dto: UpdateUserDto) {
-    const exists = await this.prisma.user.findUnique({ where: { id } });
-    if (!exists) throw new NotFoundException('User not found');
+    try {
+      const exists = await this.prisma.user.findUnique({ where: { id } });
+      if (!exists) throw new NotFoundException('User not found');
 
-    const updated = await this.prisma.user.update({
-      where: { id },
-      data: {
-        email: dto.email,
-        firstName: dto.firstName,
-        lastName: dto.lastName,
-      },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        updatedAt: true,
-      },
-    });
-    return updated;
+      const updated = await this.prisma.user.update({
+        where: { id },
+        data: {
+          email: dto.email,
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          role: dto.role,
+        },
+        select: {
+          id: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          updatedAt: true,
+        },
+      });
+      return { updated: updated, success: true };
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async removeById(id: string) {
-    await this.prisma.user.delete({ where: { id } });
-    return { success: true };
+    try {
+      await this.prisma.user.delete({ where: { id } });
+      return { success: true };
+    } catch (error) {
+      throw new NotFoundException('User not found');
+    }
   }
 
-  // helper to find by email (used by auth)
   async findByEmail(email: string) {
-    return this.prisma.user.findUnique({ where: { email } });
+    try {
+      return this.prisma.user.findUnique({ where: { email } });
+    } catch (error) {
+      console.log(error);
+    }
   }
 }

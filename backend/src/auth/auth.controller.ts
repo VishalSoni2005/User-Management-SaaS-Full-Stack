@@ -10,7 +10,6 @@ import {
 import { AuthService } from './auth.service';
 import { Signup, LoginDto } from './dto';
 import type { Request, Response } from 'express';
-import { log } from 'node:console';
 
 @Controller('/auth')
 export class AuthControllers {
