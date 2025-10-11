@@ -7,14 +7,20 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as argon2 from 'argon2';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AppLoggerService } from 'src/app-logger/app-logger.service';
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly logger: AppLoggerService,
+  ) {}
 
   async create(createDto: CreateUserDto) {
+    this.logger.info('Create user attempt in service');
     try {
       const hash = await argon2.hash(createDto.password);
+      this.logger.debug('Password hashed successfully in service');
       const user = await this.prisma.user.create({
         data: {
           firstName: createDto.firstName!,
@@ -33,8 +39,10 @@ export class UsersService {
           createdAt: true,
         },
       });
+      this.logger.info('User created successfully in service');
       return user;
     } catch (error: any) {
+      this.logger.error('Error in create user service', error);
       // Prisma unique error code for Mongo is also P2002
       if (error.code === 'P2002') {
         throw new BadRequestException('Email already in use');
@@ -44,8 +52,9 @@ export class UsersService {
   }
 
   async findAll() {
+    this.logger.info('Get all users attempt in service');
     try {
-      const hlo = this.prisma.user.findMany({
+      const all_users = this.prisma.user.findMany({
         select: {
           id: true,
           email: true,
@@ -56,14 +65,19 @@ export class UsersService {
           updatedAt: true,
         },
       });
-      console.log('[userService] findall services called', hlo); // --- IGNORE ---
-      return hlo;
+      if ((await all_users).length === 0)
+        throw new NotFoundException('No users found');
+
+      this.logger.info('All users fetched successfully in service');
+      return all_users;
     } catch (error) {
+      this.logger.error('Error in find all users service', error);
       throw new NotFoundException('No users found');
     }
   }
 
   async findOneById(id: string) {
+    this.logger.info(`Get user by id attempt: ${id}`);
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
@@ -79,8 +93,8 @@ export class UsersService {
       });
 
       if (!user) throw new NotFoundException('User not found');
-      console.log('findonebyid services called'); // --- IGNORE ---
 
+      this.logger.info(`User found with id: ${id}`);
       return user;
     } catch (error) {
       console.log(error);
@@ -157,6 +171,7 @@ export class UsersService {
   // }
 
   async updateById(id: string, dto: UpdateUserDto) {
+    this.logger.info(`Update user by id attempt: ${id}`);
     try {
       const exists = await this.prisma.user.findUnique({ where: { id } });
       if (!exists) throw new NotFoundException('User not found');
@@ -178,6 +193,7 @@ export class UsersService {
           updatedAt: true,
         },
       });
+      this.logger.info(`User updated successfully with id: ${id}`);
       return { updated: updated, success: true };
     } catch (error) {
       console.log(error);
@@ -185,17 +201,26 @@ export class UsersService {
   }
 
   async removeById(id: string) {
+    this.logger.info(`Delete user by id attempt: ${id}`);
     try {
       await this.prisma.user.delete({ where: { id } });
+      this.logger.info(`User deleted successfully with id: ${id}`);
       return { success: true };
     } catch (error) {
+      this.logger.error('Error in delete user service', error);
       throw new NotFoundException('User not found');
     }
   }
 
   async findByEmail(email: string) {
+    this.logger.info(`Find user by email attempt: ${email}`);
     try {
-      return this.prisma.user.findUnique({ where: { email } });
+      const unique_user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+      if (!unique_user) throw new NotFoundException('User not found');
+      this.logger.info(`User found with email: ${email}`);
+      return unique_user;
     } catch (error) {
       console.log(error);
     }

@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 // import { Logger } from 'pino-nestjs';
 import { AppLoggerService } from './app-logger/app-logger.service';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -15,6 +16,16 @@ async function bootstrap() {
   const appLogger = app.get(AppLoggerService);
   app.useLogger(appLogger);
 
+  const configDocs = new DocumentBuilder()
+    .setTitle('NestJS API')
+    .setDescription('The NestJS API description')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+
+  const document = SwaggerModule.createDocument(app, configDocs);
+  SwaggerModule.setup('api/docs', app, document);
+
   appLogger.log('🚀 Application starting...');
   app.useGlobalPipes(
     new ValidationPipe({
@@ -23,14 +34,13 @@ async function bootstrap() {
       transform: true, // transforms payloads to DTO instances
     }),
   );
-  // app.use(cookieParser());
   app.use(cookieParser());
 
-  console.log(bootstrap.name);
+  // console.log(bootstrap.name);
 
   app.enableCors({
-    origin: 'http://localhost:3000', // explicitly allow Next.js dev server
-    credentials: true, // allow cookies / auth headers if needed
+    origin: 'http://localhost:3000',
+    credentials: true, // allow cookies
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
 
@@ -39,5 +49,3 @@ async function bootstrap() {
   console.log(`App is running on port ${port}`);
 }
 bootstrap();
-
-// somewhere in your initialization file

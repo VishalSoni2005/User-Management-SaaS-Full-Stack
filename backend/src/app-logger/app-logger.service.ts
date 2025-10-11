@@ -37,8 +37,8 @@ export class AppLoggerService implements LoggerService {
     );
   }
 
-  info(message: string) {
-    this.logger.info(message);
+  info(message: string, context?: string, trace?: string) {
+    this.logger.info(`${message}`);
   }
 
   log(message: string) {

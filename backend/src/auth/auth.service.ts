@@ -12,6 +12,7 @@ import { ConfigService } from '@nestjs/config';
 // import { AppLoggerService } from 'src/app-logger';
 import { Response } from 'express';
 import { AppLoggerService } from 'src/app-logger/app-logger.service';
+import { trace } from 'console';
 
 @Injectable()
 export class AuthService {
@@ -20,9 +21,7 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private readonly logger: AppLoggerService,
-  ) {
-    // this.logger.setContext(AuthService.name);
-  }
+  ) {}
   private parseExpiryToMs(exp: string) {
     // simple parser for formats like '900s', '15m', '7d'
     if (exp.endsWith('ms')) return parseInt(exp.slice(0, -2), 10);
@@ -58,76 +57,96 @@ export class AuthService {
     firstName: string,
     lastName?: string | null,
   ) {
-    // step 1: getting secrets
-    const accessSecret = this.config.get<string>('JWT_ACCESS_SECRET');
-    const refreshSecret = this.config.get<string>('JWT_REFRESH_SECRET');
+    try {
+      // step 1: getting secrets
+      const accessSecret = this.config.get<string>('JWT_ACCESS_SECRET');
+      const refreshSecret = this.config.get<string>('JWT_REFRESH_SECRET');
 
-    console.log(AuthService.name);
+      console.log(AuthService.name);
 
-    if (!accessSecret || !refreshSecret) {
-      throw new Error('JWT secrets not configured');
+      if (!accessSecret || !refreshSecret) {
+        throw new Error('JWT secrets not configured');
+      }
+
+      //? step 2: payload
+      const payload = {
+        userId: userId,
+        email: email,
+        role: role,
+        firstName: firstName,
+        lastName: lastName,
+      };
+
+      //* step 3: accesstoken and refreshtoken
+      //! access token have payload
+      const accessToken = await this.jwt.signAsync(payload, {
+        secret: accessSecret,
+        expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m',
+      });
+
+      const refreshToken = await this.jwt.signAsync(
+        { sub: userId }, //! refresh token doesn't have payload
+        {
+          secret: refreshSecret,
+          expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
+        },
+      );
+
+      return { accessToken, refreshToken };
+    } catch (error) {
+      this.logger.error('Error in getting tokens', error);
+      throw error;
     }
-
-    //? step 2: payload
-    const payload = {
-      userId: userId,
-      email: email,
-      role: role,
-      firstName: firstName,
-      lastName: lastName,
-    };
-
-    //* step 3: accesstoken and refreshtoken
-    //! access token have payload
-    const accessToken = await this.jwt.signAsync(payload, {
-      secret: accessSecret,
-      expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m',
-    });
-
-    const refreshToken = await this.jwt.signAsync(
-      { sub: userId }, //! refresh token doesn't have payload
-      {
-        secret: refreshSecret,
-        expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
-      },
-    );
-
-    return { accessToken, refreshToken };
   }
 
   private async updateRefreshToken(userId: string, refreshToken: string) {
-    const hashed = await argon2.hash(refreshToken); // hash the refresh token before storing
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken: hashed },
-    });
+    try {
+      const hashed = await argon2.hash(refreshToken); // hash the refresh token before storing
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { refreshToken: hashed },
+      });
+    } catch (error) {
+      this.logger.error('Error in updating refresh token', error);
+      throw error;
+    }
   }
 
   async refreshTokens(userId: string, refreshToken: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    if (!user || !user.refreshToken)
-      throw new ForbiddenException('Access denied');
+    this.logger.log(`Refreshing tokens for user: ${userId}`);
+    try {
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      if (!user || !user.refreshToken)
+        throw new ForbiddenException('Access denied');
 
-    const isValid = await argon2.verify(user.refreshToken, refreshToken);
-    if (!isValid) throw new ForbiddenException('Invalid refresh token');
+      const isValid = await argon2.verify(user.refreshToken, refreshToken);
+      if (!isValid) throw new ForbiddenException('Invalid refresh token');
 
-    const tokens = await this.getTokens(
-      user.id,
-      user.email,
-      user.role,
-      user.firstName,
-      user.lastName,
-    );
-    await this.updateRefreshToken(user.id, tokens.refreshToken);
+      const tokens = await this.getTokens(
+        user.id,
+        user.email,
+        user.role,
+        user.firstName,
+        user.lastName,
+      );
+      await this.updateRefreshToken(user.id, tokens.refreshToken);
 
-    return {
-      access_token: tokens.accessToken,
-      refresh_token: tokens.refreshToken,
-    };
+      return {
+        access_token: tokens.accessToken,
+        refresh_token: tokens.refreshToken,
+      };
+    } catch (error) {
+      this.logger.error('Error in refreshing tokens', error);
+      throw error;
+    }
   }
 
   async signup(dto: Signup, res: Response) {
-    this.logger.log(`Signup attempt for email: ${dto.email}`);
+    this.logger.info(
+      `Signup attempt for email: ${dto.email}`,
+      AuthService.name,
+      'signup',
+    );
     try {
       const hash = await argon2.hash(dto.password);
       this.logger.debug('Password hashed successfully');
