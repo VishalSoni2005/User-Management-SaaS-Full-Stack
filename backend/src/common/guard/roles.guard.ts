@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '@prisma/client';
-
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
@@ -12,12 +10,16 @@ export class RolesGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-
-    if (!requiredRoles) {
-      return true;
-    }
+    if (!requiredRoles) return true;
 
     const { user } = context.switchToHttp().getRequest();
-    return requiredRoles.some((role) => user.role?.includes(role));
+    console.log('🟣 user from RolesGuard:', user);
+
+    if (!user) return false;
+    if (!requiredRoles.includes(user.role)) {
+      console.log(`❌ Unauthorized: ${user.role} is not  ${requiredRoles}`);
+      return false;
+    }
+    return true;
   }
 }

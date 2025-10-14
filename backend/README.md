@@ -39,3 +39,8 @@ used on controllers and dtos mainly
 
 3: 
 4: 
+
+
+## -> Logger on controllers and service layer
+
+i: make a lamda single line templete for loggers

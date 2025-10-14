@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   ForbiddenException,
-  HttpCode,
   Post,
   Req,
   Res,
@@ -15,18 +14,19 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiInternalServerErrorResponse,
-  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiProperty,
-  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { AppLoggerService } from 'src/app-logger/app-logger.service';
 
-@ApiTags('/auth')
+@ApiTags('Auth')
 @Controller('/auth')
 export class AuthControllers {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private readonly logger: AppLoggerService,
+  ) {}
 
   // private setRefreshCookie(res: Response, refreshToken: string) {
   //   const isProd = process.env.NODE_ENV === 'production';
@@ -67,10 +67,11 @@ export class AuthControllers {
     description: 'Unexpected server error during signup.',
   })
   async signup(@Body() dto: Signup, @Res({ passthrough: true }) res: Response) {
+    this.logger.info('Signup attempt is made ');
     try {
       return this.authService.signup(dto, res);
     } catch (error) {
-      console.log('error in signup', error);
+      this.logger.error('Error in signup', error);
       throw new ForbiddenException('Access denied');
     }
   }

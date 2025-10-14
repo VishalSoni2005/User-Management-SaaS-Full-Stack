@@ -9,10 +9,8 @@ import * as argon2 from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-// import { AppLoggerService } from 'src/app-logger';
 import { Response } from 'express';
 import { AppLoggerService } from 'src/app-logger/app-logger.service';
-import { trace } from 'console';
 
 @Injectable()
 export class AuthService {

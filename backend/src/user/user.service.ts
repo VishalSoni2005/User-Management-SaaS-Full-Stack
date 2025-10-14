@@ -8,6 +8,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import * as argon2 from 'argon2';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AppLoggerService } from 'src/app-logger/app-logger.service';
+import { FindAllUsersQueryDto } from './dto/find-all-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -51,10 +52,40 @@ export class UsersService {
     }
   }
 
-  async findAll() {
-    this.logger.info('Get all users attempt in service');
+  async findAll(query: FindAllUsersQueryDto) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'firstName',
+      order = 'asc',
+      search,
+      role,
+    } = query;
+
+    const skip = (Number(page) - 1) * Number(limit);
+
+    const where: any = {};
+
+    if (role) {
+      where.role = role;
+    }
+
+    if (search) {
+      where.OR = [
+        { firstName: { contains: search, mode: 'insensitive' } },
+        { lastName: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ];
+    }
+
     try {
-      const all_users = this.prisma.user.findMany({
+      const users = await this.prisma.user.findMany({
+        where,
+        skip,
+        take: Number(limit),
+        orderBy: {
+          [sort]: order,
+        },
         select: {
           id: true,
           email: true,
@@ -65,14 +96,22 @@ export class UsersService {
           updatedAt: true,
         },
       });
-      if ((await all_users).length === 0)
-        throw new NotFoundException('No users found');
 
-      this.logger.info('All users fetched successfully in service');
-      return all_users;
+      const total = await this.prisma.user.count({ where });
+
+      if (users.length === 0) throw new NotFoundException('No users found');
+
+      return {
+        data: users,
+        meta: {
+          total,
+          page: Number(page),
+          limit: Number(limit),
+          totalPages: Math.ceil(total / Number(limit)),
+        },
+      };
     } catch (error) {
-      this.logger.error('Error in find all users service', error);
-      throw new NotFoundException('No users found');
+      throw new NotFoundException('Error fetching users');
     }
   }
 

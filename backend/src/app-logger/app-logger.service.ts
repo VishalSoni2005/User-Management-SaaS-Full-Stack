@@ -30,7 +30,7 @@ export class AppLoggerService implements LoggerService {
 
     this.logger = pino(
       {
-        level: process.env.LOG_LEVEL || 'trace', // All levels
+        level: process.env.LOG_LEVEL || 'trace',
         timestamp: pino.stdTimeFunctions.isoTime,
       },
       streams,
@@ -38,26 +38,36 @@ export class AppLoggerService implements LoggerService {
   }
 
   info(message: string, context?: string, trace?: string) {
-    this.logger.info(`${message}`);
+    this.logger.info(
+      `[INFO] ${message} ${context !== undefined ? context : ''} ${trace !== undefined ? trace : ''}`,
+    );
   }
 
-  log(message: string) {
-    this.logger.info(message);
+  log(message: string, context?: string, trace?: string) {
+    this.logger.info(
+      `[LOG] ${message} ${context !== undefined ? context : ''} ${trace !== undefined ? trace : ''}`,
+    );
   }
 
   error(message: string, trace?: string) {
-    this.logger.error({ trace }, message);
+    this.logger.error(`[ERROR] ${message} ${trace !== undefined ? trace : ''}`);
   }
 
-  warn(message: string) {
-    this.logger.warn(message);
+  warn(message: string, trace?: string, context?: string) {
+    this.logger.warn(
+      `[WARN] ${message} ${trace !== undefined ? trace : ''} ${context !== undefined ? context : ''}`,
+    );
   }
 
-  debug(message: string) {
-    this.logger.debug(message);
+  debug(message: string, context?: string, trace?: string) {
+    this.logger.debug(
+      `[DEBUG] ${message} ${context !== undefined ? context : ''} ${trace !== undefined ? trace : ''}`,
+    );
   }
 
-  verbose(message: string) {
-    this.logger.trace(message);
+  verbose(message: string, context?: string, trace?: string) {
+    this.logger.trace(
+      `[VERBOSE] ${message} ${context !== undefined ? context : ''} ${trace !== undefined ? trace : ''}`,
+    );
   }
 }

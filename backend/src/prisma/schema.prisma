@@ -8,21 +8,21 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  email        String    @unique
-  hash         String
+  email String @unique
+  hash  String
 
-  role         Role      @default(USER)
-  
+  role Role @default(USER)
+
   refreshToken String?
 
-  firstName    String
-  lastName     String?
+  firstName String
+  lastName  String?
 
-  bookmarks    Bookmark[]
+  Bookmark Bookmark[]
 }
 
 model Bookmark {

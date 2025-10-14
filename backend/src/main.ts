@@ -1,10 +1,7 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
-
 import { ValidationPipe } from '@nestjs/common';
-// import { Logger } from 'pino-nestjs';
 import { AppLoggerService } from './app-logger/app-logger.service';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
@@ -19,7 +16,7 @@ async function bootstrap() {
   const configDocs = new DocumentBuilder()
     .setTitle('NestJS API')
     .setDescription('The NestJS API description')
-    .setVersion('1.0')
+    .setVersion('9.0')
     .addBearerAuth()
     .build();
 
@@ -36,11 +33,9 @@ async function bootstrap() {
   );
   app.use(cookieParser());
 
-  // console.log(bootstrap.name);
-
   app.enableCors({
     origin: 'http://localhost:3000',
-    credentials: true, // allow cookies
+    credentials: true, // cookies
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
 

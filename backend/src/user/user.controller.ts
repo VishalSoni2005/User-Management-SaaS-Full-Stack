@@ -8,6 +8,7 @@ import {
   Param,
   Put,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -26,6 +27,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { UserResponseDto, UserProfileDto } from './dto/user-response.dto';
+import { FindAllUsersQueryDto } from './dto/find-all-user.dto';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -86,10 +88,10 @@ export class UsersController {
     status: 403,
     description: 'Forbidden — only admin can perform this action',
   })
-  async findAll() {
+  async findAll(@Query() query: FindAllUsersQueryDto) {
     this.logger.info('🟡 Get all users attempt');
     try {
-      return await this.usersService.findAll();
+      return await this.usersService.findAll(query);
     } catch (error) {
       this.logger.error('❌ Error in findAll users controller', error);
       throw error;
@@ -98,6 +100,7 @@ export class UsersController {
 
   // Get Current User Profile
   @Get('me')
+  @Roles('USER')
   @ApiOperation({
     summary: 'Get current logged-in user profile',
     description:
@@ -115,7 +118,7 @@ export class UsersController {
   async me(@Req() req: any) {
     this.logger.info('👤 Get current user attempt');
     try {
-      const userId = req.user.userId; // ✅ Added by JwtAuthGuard
+      const userId = req.user.userId;
       return await this.usersService.findOneById(userId);
     } catch (error) {
       this.logger.error('❌ Error in me controller', error);
@@ -243,6 +246,7 @@ export class UsersController {
 // import { Roles } from 'src/common/decorators/roles.decorator';
 // import { AppLoggerService } from 'src/app-logger/app-logger.service';
 // import { ApiResponse, ApiTags } from '@nestjs/swagger';
+// import { FindAllUsersQueryDto } from './dto/find-all-user.dto';
 
 // @ApiTags('Users')
 // @Controller('users')
@@ -268,10 +272,10 @@ export class UsersController {
 //   @ApiResponse({ status: 200, description: 'Get all users' })
 //   @Get('/getallusers')
 //   @Roles('ADMIN')
-//   async findAll() {
+//   async findAll(query: FindAllUsersQueryDto) {
 //     this.logger.info('Get all users attempt');
 //     try {
-//       return this.usersService.findAll();
+//       return this.usersService.findAll(query);
 //     } catch (error) {
 //       this.logger.error('Error in find all users controller', error);
 //       console.log(' error in findAll controller', error);
