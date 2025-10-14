@@ -159,7 +159,7 @@ export class UsersController {
   }
 
   // Update User (Admin only)
-  @Put(':id')
+  @Put('/updateuser/:id')
   @Roles('ADMIN')
   @ApiOperation({
     summary: 'Update user by ID (Admin only)',
@@ -192,7 +192,7 @@ export class UsersController {
   }
 
   // Delete User (Admin only)
-  @Delete(':id')
+  @Delete('/deleteuser/:id')
   @Roles('ADMIN')
   @ApiOperation({
     summary: 'Delete user by ID (Admin only)',
@@ -225,109 +225,3 @@ export class UsersController {
     }
   }
 }
-
-// import {
-//   Controller,
-//   Post,
-//   Body,
-//   Get,
-//   UseGuards,
-//   Req,
-//   Param,
-//   Put,
-//   Delete,
-// } from '@nestjs/common';
-// import { UsersService } from './user.service';
-// import { CreateUserDto } from './dto/create-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto';
-// import { JwtAuthGuard } from 'src/common/guard';
-// import { IdDto } from 'src/common/dtos/id.dto';
-// import { RolesGuard } from 'src/common/guard/roles.guard';
-// import { Roles } from 'src/common/decorators/roles.decorator';
-// import { AppLoggerService } from 'src/app-logger/app-logger.service';
-// import { ApiResponse, ApiTags } from '@nestjs/swagger';
-// import { FindAllUsersQueryDto } from './dto/find-all-user.dto';
-
-// @ApiTags('Users')
-// @Controller('users')
-// @UseGuards(JwtAuthGuard, RolesGuard)
-// export class UsersController {
-//   constructor(
-//     private usersService: UsersService,
-//     private readonly logger: AppLoggerService,
-//   ) {}
-
-//   @ApiResponse({ status: 201, description: 'User created successfully' })
-//   @Post('/createuser')
-//   @Roles('ADMIN')
-//   async create(@Body() dto: CreateUserDto) {
-//     this.logger.info('Create user attempt');
-//     try {
-//       return this.usersService.create(dto);
-//     } catch (error) {
-//       this.logger.error('Error in create user controller', error);
-//     }
-//   }
-
-//   @ApiResponse({ status: 200, description: 'Get all users' })
-//   @Get('/getallusers')
-//   @Roles('ADMIN')
-//   async findAll(query: FindAllUsersQueryDto) {
-//     this.logger.info('Get all users attempt');
-//     try {
-//       return this.usersService.findAll(query);
-//     } catch (error) {
-//       this.logger.error('Error in find all users controller', error);
-//       console.log(' error in findAll controller', error);
-//     }
-//   }
-
-//   @Get('me')
-//   async me(@Req() req: any) {
-//     this.logger.info('Get current user attempt');
-//     try {
-//       //! user is added to req by JwtAuthGuard after validating jwt token
-//       const userId = req.user.userId;
-//       return this.usersService.findOneById(userId);
-//     } catch (error) {
-//       this.logger.error('Error in me controller', error);
-//       console.log(' error in me controller', error);
-//     }
-//   }
-
-//   @Get(':id')
-//   @Roles('ADMIN')
-//   async findOne(@Param() param: IdDto, @Req() req: any) {
-//     this.logger.info(`Get user by id attempt: ${param.id}`);
-//     try {
-//       return this.usersService.findOneById(param.id);
-//     } catch (error) {
-//       this.logger.error('Error in findOne controller', error);
-//       console.log(' error in findOne controller', error);
-//     }
-//   }
-
-//   @Put(':id')
-//   @Roles('ADMIN')
-//   async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
-//     this.logger.info(`Update user by id attempt: ${id}`);
-//     try {
-//       return this.usersService.updateById(id, dto);
-//     } catch (error) {
-//       this.logger.error('Error in update controller', error);
-//       console.log(' error in update controller', error);
-//     }
-//   }
-
-//   @Delete(':id')
-//   @Roles('ADMIN')
-//   async remove(@Param('id') id: string) {
-//     this.logger.info(`Delete user by id attempt: ${id}`);
-//     try {
-//       return this.usersService.removeById(id);
-//     } catch (error) {
-//       this.logger.error('Error in remove controller', error);
-//       console.log(' error in remove controller', error);
-//     }
-//   }
-// }

@@ -1,20 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/lib/store/store"; 
+import { updateUser } from "@/lib/store/features/userSlice"; 
+import { getAccessToken } from "@/lib/auth";
 
 export default function EditPage() {
   const { id } = useParams();
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    role: "",
+  });
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch(`http://localhost:4000/users/${id}`);
+        const token = getAccessToken();
+        const response = await fetch(`http://localhost:4000/users/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const data = await response.json();
         setUser(data);
+        setFormData({
+          firstName: data.firstName || "",
+          lastName: data.lastName || "",
+          email: data.email || "",
+          role: data.role || "",
+        });
       } catch (error) {
         console.error("Error fetching user data:", error);
       } finally {
@@ -23,6 +45,25 @@ export default function EditPage() {
     };
     fetchUser();
   }, [id]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      await dispatch(updateUser({ id: id as string, data: formData }));
+      alert("User updated successfully!");
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Error updating user:", error);
+      alert("Failed to update user. Try again!");
+    }
+  };
 
   if (loading)
     return (
@@ -39,56 +80,76 @@ export default function EditPage() {
     );
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-6">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow duration-300">
+    <div className="min-h-auto flex items-center justify-center py-12 px-6 bg-gray-900">
+      <form
+        onSubmit={handleSubmit}
+        className="max-w-md w-full bg-gray-300 rounded-2xl shadow-lg p-8 border border-gray-100 hover:shadow-xl transition-shadow text-black duration-300"
+      >
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
           Edit User Details
         </h1>
 
         <div className="space-y-4">
-          <div className="flex justify-between">
-            <span className="text-gray-600 font-medium">User ID:</span>
-            <span className="text-gray-900 truncate max-w-[180px]">
-              {user.id}
-            </span>
+          <div>
+            <label className="block text-gray-600 font-medium mb-1">
+              First Name
+            </label>
+            <input
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+            />
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-gray-600 font-medium">First Name:</span>
-            <span className="text-gray-900">{user.firstName}</span>
+          <div>
+            <label className="block text-gray-600 font-medium mb-1">
+              Last Name
+            </label>
+            <input
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+            />
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-gray-600 font-medium">Last Name:</span>
-            <span className="text-gray-900">{user.lastName}</span>
+          <div>
+            <label className="block text-gray-600 font-medium mb-1">
+              Email
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
+            />
           </div>
 
-          <div className="flex justify-between">
-            <span className="text-gray-600 font-medium">Email:</span>
-            <span className="text-gray-900">{user.email}</span>
-          </div>
-
-          <div className="flex justify-between">
-            <span className="text-gray-600 font-medium">Role:</span>
-            <span
-              className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                user.role === "ADMIN"
-                  ? "bg-purple-100 text-purple-700"
-                  : "bg-blue-100 text-blue-700"
-              }`}
+          <div>
+            <label className="block text-gray-600 font-medium mb-1">Role</label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-blue-200"
             >
-              {user.role}
-            </span>
+              <option value="USER">USER</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
           </div>
         </div>
 
         <button
+          type="submit"
           className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg shadow transition duration-200"
-          onClick={() => alert("Edit functionality coming soon!")}
         >
-          Edit User
+          Save Changes
         </button>
-      </div>
+      </form>
     </div>
   );
 }

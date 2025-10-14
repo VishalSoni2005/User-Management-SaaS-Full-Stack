@@ -40,22 +40,13 @@ export function AuthForm({ type }: { type: "signup" | "login" }) {
   const onSubmitSignup = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      // const transformedData = {
-      //   ...data,
-      //   role: data.role === "admin" ? "admin" : "user",
-      // }
-      console.log("transformedData is : ", data);
-
       const res = await axiosInstance.post("/auth/signup", data);
 
-      console.log("Signup successfuL", res.data);
-      console.log("Access token:", res.data.access_token);
       localStorage.setItem("access_token", res.data.access_token);
 
       router.push("/dashboard");
     } catch (error) {
       console.log("Error in onSubmitSignup", error);
-      // alert("Invalid credentials");
     } finally {
       setIsLoading(false);
     }
@@ -64,10 +55,8 @@ export function AuthForm({ type }: { type: "signup" | "login" }) {
   const onSubmitLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      console.log("data is : ", data);
       const res = await axiosInstance.post("/auth/login", data);
-      console.log("Login successful", res.data);
-      localStorage.setItem("access_token", res.data.accessToken);
+      localStorage.setItem("access_token", res.data.access_token);
       router.push("/dashboard");
     } catch (error) {
       console.log("Error in onSubmitLogin", error);
