@@ -6,6 +6,10 @@ import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { AppLoggerModule } from './app-logger/app-logger.module';
 import { AppLoggerService } from './app-logger/app-logger.service';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { RewardModule } from './reward/reward.module';
+import { RedemptionModule } from './redemption/redemption.module';
+import { TripModule } from './trip/trip.module';
 
 @Module({
   imports: [
@@ -18,6 +22,14 @@ import { AppLoggerService } from './app-logger/app-logger.service';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+
+    LeaderboardModule,
+
+    RewardModule,
+
+    RedemptionModule,
+
+    TripModule,
   ],
   controllers: [],
   providers: [AppLoggerService],

@@ -4,11 +4,13 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { AppDispatch } from "@/lib/store/store"; 
-import { updateUser } from "@/lib/store/features/userSlice"; 
+import { AppDispatch } from "@/store/store";
+import { updateUser } from "@/store/features/userSlice";
 import { getAccessToken } from "@/lib/auth";
 
+
 export default function EditPage() {
+  // const { id } = useParams<EditPageParams>();
   const { id } = useParams();
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();

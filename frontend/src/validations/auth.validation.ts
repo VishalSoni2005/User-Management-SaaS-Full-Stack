@@ -14,13 +14,14 @@ export const signupSchema = z.object({
     .string()
     .email("Please enter a valid email address")
     .min(1, "Email is required"),
-  password: z.string(),
-  // .min(8, "Password must be at least 8 characters")
-  // .regex(
-  //   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-  //   "Password must contain at least one uppercase letter, one lowercase letter, and one number"
-  // ),
-  role: z.enum(["admin", "user"], {
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
+  role: z.enum(["ADMIN", "USER"], {
     error: "Please select a role",
   }),
 });

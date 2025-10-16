@@ -4,36 +4,52 @@ import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getAccessToken } from "@/lib/auth";
 import { User } from "@/types/user.type";
 
-// 🧠 Define the state shape
 interface UserState {
   users: User[];
+  total: number;
+  currentPage: number;
+  totalPages: number;
   loading: boolean;
   error: string | null;
 }
 
+interface UpdateUser {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+}
+
 const initialState: UserState = {
   users: [],
+  total: 0,
+  currentPage: 1,
+  totalPages: 1,
   loading: false,
   error: null,
 };
 
-
 export const fetchAllUsers = createAsyncThunk<
-  User[], // Return type
-  void, // Argument type
+  { data: User[]; total: number; page: number; totalPages: number }, // Return type
+  { limit: number; page: number }, // Argument type
   { rejectValue: string } // Rejection type
->("user/fetchAllUsers", async (_, { rejectWithValue }) => {
+>("user/fetchAllUsers", async ({ limit, page }, { rejectWithValue }) => {
   try {
     const token = getAccessToken();
-    const res = await axios.get<{ data: User[] }>(
-      "http://localhost:4000/users/getallusers",
+    const res = await axios.get(
+      `http://localhost:4000/users/getallusers?limit=${limit}&page=${page}`,
+      // API_ENDPOINT.GET_ALL_USERS,
       {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       }
     );
 
-    console.log("Fetched users from API:", res.data.data);
-    return res.data.data;
+    return {
+      data: res.data.data,
+      total: res.data.meta.total,
+      page: res.data.meta.page,
+      totalPages: res.data.meta.totalPages,
+    };
   } catch (err: any) {
     const message =
       err?.response?.data?.message || err.message || "Failed to fetch users";
@@ -41,11 +57,10 @@ export const fetchAllUsers = createAsyncThunk<
   }
 });
 
-// 2️⃣ Delete User
 export const deleteUser = createAsyncThunk<
-  string, // Return type (userId)
-  string, // Argument type (userId)
-  { rejectValue: string } // Rejection type
+  string, // return (userId)
+  string, // argument (userId)
+  { rejectValue: string }
 >("user/deleteUser", async (userId, { rejectWithValue }) => {
   try {
     const token = getAccessToken();
@@ -60,34 +75,35 @@ export const deleteUser = createAsyncThunk<
   }
 });
 
-// 3️⃣ Update User
 export const updateUser = createAsyncThunk<
   User, // Return type
-  { id: string; data: User }, // Argument type
-  { rejectValue: string } // Rejection type
+  { id: string; data: UpdateUser },
+  { rejectValue: string }
 >("user/updateUser", async ({ id, data }, { rejectWithValue }) => {
   try {
     const token = getAccessToken();
-    console.log("user from updateuser : ", data);
-    
     const res = await axios.put<{ data: User }>(
-      `http://localhost:4000/users/edituser/${id}`,
+      `http://localhost:4000/users/updateuser/${id}`,
       data,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
     );
 
-    console.log("Updated user:", res.data.data);
+    if (!res.data.data) {
+      throw new Error("Failed to update user");
+    }
+
+    console.log("user after updation : ", res.data);
+    
+
     return res.data.data;
   } catch (err: any) {
     const message =
       err?.response?.data?.message || err.message || "Failed to update user";
-    return rejectWithValue(message);
+    return rejectWithValue("Error updating user: " + message);
   }
 });
-
-// 🧩 --- Slice --- 🧩
 
 const userSlice = createSlice({
   name: "user",
@@ -104,29 +120,28 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // 🔹 Fetch All Users
       .addCase(fetchAllUsers.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchAllUsers.fulfilled, (state, action) => {
         state.loading = false;
-        state.users = action.payload;
+        state.users = action.payload.data;
+        state.total = action.payload.total;
+        state.currentPage = action.payload.page;
+        state.totalPages = action.payload.totalPages;
       })
       .addCase(fetchAllUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload ?? "Something went wrong fetching users";
       })
-
-      // 🔹 Delete User
       .addCase(deleteUser.fulfilled, (state, action) => {
         state.users = state.users.filter((u) => u.id !== action.payload);
+        state.total -= 1;
       })
       .addCase(deleteUser.rejected, (state, action) => {
         state.error = action.payload ?? "Something went wrong deleting user";
       })
-
-      // 🔹 Update User
       .addCase(updateUser.fulfilled, (state, action) => {
         state.users = state.users.map((u) =>
           u.id === action.payload.id ? action.payload : u
@@ -138,6 +153,5 @@ const userSlice = createSlice({
   },
 });
 
-// 🧩 --- Exports ---
 export const { clearUsers, setUsers } = userSlice.actions;
 export default userSlice.reducer;

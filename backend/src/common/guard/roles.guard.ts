@@ -17,7 +17,9 @@ export class RolesGuard implements CanActivate {
 
     if (!user) return false;
     if (!requiredRoles.includes(user.role)) {
-      console.log(`❌ Unauthorized: ${user.role} is not  ${requiredRoles}`);
+      // console.log(`❌ Unauthorized: ${user.role} is not  ${requiredRoles}`);
+      console.log(`Unauthorized role -> ${requiredRoles} is required`);
+
       return false;
     }
     return true;

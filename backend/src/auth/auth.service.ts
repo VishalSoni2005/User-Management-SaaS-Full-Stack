@@ -143,7 +143,7 @@ export class AuthService {
     this.logger.info(
       `Signup attempt for email: ${dto.email}`,
       AuthService.name,
-      'signup',
+      // 'signup',
     );
     try {
       const hash = await argon2.hash(dto.password);

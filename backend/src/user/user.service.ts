@@ -57,7 +57,7 @@ export class UsersService {
       page = 1,
       limit = 10,
       sort = 'firstName',
-      order = 'asc',
+      order = 'desc',
       search,
       role,
     } = query;
@@ -139,75 +139,6 @@ export class UsersService {
       console.log(error);
     }
   }
-
-  // Admin list: pagination, search, filter by role, sort
-  // async findAll(params: {
-  //   page?: number;
-  //   limit?: number;
-  //   search?: string;
-  //   role?: string;
-  //   sort?: string;
-  // }) {
-  //   const page = Math.max(params.page ?? 1, 1);
-  //   const limit = Math.min(Math.max(params.limit ?? 10, 1), 100);
-  //   const skip = (page - 1) * limit;
-
-  //   const where: any = {};
-  //   if (params.search) {
-  //     where.OR = [
-  //       { email: { contains: params.search, mode: 'insensitive' } },
-  //       { firstName: { contains: params.search, mode: 'insensitive' } },
-  //       { lastName: { contains: params.search, mode: 'insensitive' } },
-  //     ];
-  //   }
-  //   if (params.role) where.role = params.role;
-
-  //   let orderBy: any = { createdAt: 'desc' };
-  //   if (params.sort) {
-  //     const [field, dir] = params.sort.split(':');
-  //     orderBy = { [field]: dir === 'desc' ? 'desc' : 'asc' };
-  //   }
-
-  //   const [items, total] = await Promise.all([
-  //     this.prisma.user.findMany({
-  //       where,
-  //       orderBy,
-  //       skip,
-  //       take: limit,
-  //       select: {
-  //         id: true,
-  //         email: true,
-  //         firstName: true,
-  //         lastName: true,
-  //         role: true,
-  //         createdAt: true,
-  //         updatedAt: true,
-  //       },
-  //     }),
-  //     this.prisma.user.count({ where }),
-  //   ]);
-
-  //   return {
-  //     items,
-  //     total,
-  //     page,
-  //     pages: Math.ceil(total / limit),
-  //     limit,
-  //   };
-  // }
-  // findOneById(id: string) {
-  //   return this.prisma.user.findUnique({
-  //     where: { id },
-  //     select: {
-  //       id: true,
-  //       firstName: true,
-  //       lastName: true,
-  //       email: true,
-  //       role: true,
-  //       createdAt: true,
-  //     },
-  //   });
-  // }
 
   async updateById(id: string, dto: UpdateUserDto) {
     this.logger.info(`Update user by id attempt: ${id}`);

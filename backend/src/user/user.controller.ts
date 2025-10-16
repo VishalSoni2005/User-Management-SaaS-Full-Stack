@@ -99,8 +99,8 @@ export class UsersController {
   }
 
   // Get Current User Profile
-  @Get('me')
-  @Roles('USER')
+  @Get('/me')
+  // @Roles('USER')
   @ApiOperation({
     summary: 'Get current logged-in user profile',
     description:

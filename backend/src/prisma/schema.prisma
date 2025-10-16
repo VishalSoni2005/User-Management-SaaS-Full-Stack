@@ -19,23 +19,59 @@ model User {
 
   refreshToken String?
 
-  firstName String
-  lastName  String?
+  firstName   String
+  lastName    String?
+  totalPoints Int     @default(0)
 
-  Bookmark Bookmark[]
+  trips       Trip[]
+  redemptions Redemption[]
 }
 
-model Bookmark {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  title String
-  desc  String?
-  link  String
-
+model Trip {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
   userId String @db.ObjectId
-  user   User   @relation(fields: [userId], references: [id])
+
+  distance       Float
+  averageSpeed   Float
+  harshBrakes    Int
+  overspeedCount Int
+  safetyScore    Float
+  // totalTime      Float
+
+  pointsEarned Int
+  createdAt    DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Reward {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  description    String?
+  pointsRequired Int
+  stock          Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  redemptions Redemption[]
+}
+
+model Redemption {
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String           @db.ObjectId
+  rewardId    String           @db.ObjectId
+  adminId     String?          @db.ObjectId
+  status      RedemptionStatus @default(PENDING)
+  requestedAt DateTime         @default(now())
+  approvedAt  DateTime?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reward Reward @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+}
+
+enum RedemptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum Role {
