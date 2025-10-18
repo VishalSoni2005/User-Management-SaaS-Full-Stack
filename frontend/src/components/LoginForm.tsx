@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -22,6 +23,7 @@ import type { LoginFormData } from "@/types";
 export function LoginForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [ServerError, setServerError] = useState<string | null>("");
 
   const {
     register,
@@ -40,12 +42,22 @@ export function LoginForm() {
         "http://localhost:4000/auth/login",
         data
       );
-      console.log("response from backend: ", res);
-      
+
+      console.log(res.data.message);
       localStorage.setItem("access_token", res.data.access_token);
       router.push("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.log("Error in onSubmitLogin", error);
+
+      if (error.response?.data?.message) {
+        setServerError(
+          Array.isArray(error.response.data.message)
+            ? error.response.data.message[0]
+            : error.response.data.message
+        );
+      } else {
+        setServerError("Something went wrong. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -72,6 +84,7 @@ export function LoginForm() {
               placeholder="john.doe@example.com"
               {...register("email")}
               className={errors.email ? "border-destructive" : ""}
+              
             />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -108,6 +121,9 @@ export function LoginForm() {
             </button>
           </div>
 
+          {ServerError && (
+            <p className="text-sm text-destructive">{ServerError}</p>
+          )}
           <Button
             type="submit"
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"

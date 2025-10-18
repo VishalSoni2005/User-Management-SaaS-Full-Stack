@@ -6,6 +6,7 @@ import { AppDispatch, RootState } from "../../../store/store";
 import { fetchAllUsers, deleteUser } from "../../../store/features/userSlice";
 import { getAccessToken } from "@/lib/auth";
 import LogoutButton from "../../../components/logoutButton";
+import CustomSortSelect from "@/components/CustomSortSelect";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -36,6 +37,7 @@ export default function DashboardPage() {
     <div className="p-6">
       <div className="flex justify-between">
         <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+        <CustomSortSelect />
         <LogoutButton />
       </div>
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -29,6 +30,7 @@ import type { SignupFormData } from "@/types";
 export function SignupForm() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [ServerError, setServerError] = useState<string | null>("");
 
   const {
     register,
@@ -41,19 +43,27 @@ export function SignupForm() {
 
   const onSubmitSignup = async (data: SignupFormData) => {
     setIsLoading(true);
+    setServerError(null);
     try {
-      console.log("Signup user data: ", data);
-
       const res = await axiosInstance.post(
         "http://localhost:4000/auth/signup",
         data
       );
-      console.log("response from backend: ", res.data);
+      console.log(res.data.message);
 
       localStorage.setItem("access_token", res.data.access_token);
       router.push("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.log("Error in onSubmitSignup", error);
+      if (error.response?.data?.message) {
+        setServerError(
+          Array.isArray(error.response.data.message)
+            ? error.response.data.message[0]
+            : error.response.data.message
+        );
+      } else {
+        setServerError("Something went wrong. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -185,6 +195,9 @@ export function SignupForm() {
             </button>
           </div>
 
+          {ServerError && (
+            <p className="text-sm text-destructive">{ServerError}</p>
+          )}
           <Button
             type="submit"
             className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium"

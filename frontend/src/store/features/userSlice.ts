@@ -10,7 +10,7 @@ interface UserState {
   currentPage: number;
   totalPages: number;
   loading: boolean;
-  error: string | null;
+  error: string | null;s
 }
 
 interface UpdateUser {
@@ -40,7 +40,7 @@ export const fetchAllUsers = createAsyncThunk<
       `http://localhost:4000/users/getallusers?limit=${limit}&page=${page}`,
       // API_ENDPOINT.GET_ALL_USERS,
       {
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined, //* token going from here is access token
       }
     );
 
@@ -58,8 +58,8 @@ export const fetchAllUsers = createAsyncThunk<
 });
 
 export const deleteUser = createAsyncThunk<
-  string, // return (userId)
-  string, // argument (userId)
+  string, 
+  string, 
   { rejectValue: string }
 >("user/deleteUser", async (userId, { rejectWithValue }) => {
   try {
@@ -74,7 +74,7 @@ export const deleteUser = createAsyncThunk<
     return rejectWithValue(message);
   }
 });
-
+// a)
 export const updateUser = createAsyncThunk<
   User, // Return type
   { id: string; data: UpdateUser },
