@@ -39,7 +39,6 @@ export class UsersController {
     private readonly logger: AppLoggerService,
   ) {}
 
-  // Create User (Admin only)
   @Post('/createuser')
   @Roles('ADMIN')
   @ApiOperation({
@@ -71,7 +70,6 @@ export class UsersController {
     }
   }
 
-  // Get All Users (Admin only)
   @Get('/getallusers')
   @Roles('ADMIN')
   @ApiOperation({
@@ -98,7 +96,6 @@ export class UsersController {
     }
   }
 
-  // Get Current User Profile
   @Get('/me')
   // @Roles('USER')
   @ApiOperation({

@@ -11,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { AppLoggerService } from 'src/app-logger/app-logger.service';
+import generateAvatar from 'src/common/utils/UserAvatar';
 
 @Injectable()
 export class AuthService {
@@ -20,33 +21,6 @@ export class AuthService {
     private config: ConfigService,
     private readonly logger: AppLoggerService,
   ) {}
-  private parseExpiryToMs(exp: string) {
-    // simple parser for formats like '900s', '15m', '7d'
-    if (exp.endsWith('ms')) return parseInt(exp.slice(0, -2), 10);
-    if (exp.endsWith('s')) return parseInt(exp.slice(0, -1), 10) * 1000;
-    if (exp.endsWith('m')) return parseInt(exp.slice(0, -1), 10) * 60 * 1000;
-    if (exp.endsWith('h'))
-      return parseInt(exp.slice(0, -1), 10) * 60 * 60 * 1000;
-    if (exp.endsWith('d'))
-      return parseInt(exp.slice(0, -1), 10) * 24 * 60 * 60 * 1000;
-    // fallback 7 days
-    return 7 * 24 * 60 * 60 * 1000;
-  }
-
-  private setRefreshCookie(res: Response, refreshToken: string) {
-    const isProd = process.env.NODE_ENV === 'production';
-    const maxAge = this.parseExpiryToMs(
-      process.env.JWT_REFRESH_EXPIRES_IN || '7d',
-    );
-
-    res.cookie('refresh_token', refreshToken, {
-      httpOnly: true,
-      secure: isProd,
-      sameSite: 'strict',
-      path: '/',
-      maxAge,
-    });
-  }
 
   private async getTokens(
     userId: string,
@@ -54,13 +28,12 @@ export class AuthService {
     role: string,
     firstName: string,
     lastName?: string | null,
+    avatar?: string | null,
   ) {
     try {
       // step 1: getting secrets
       const accessSecret = this.config.get<string>('JWT_ACCESS_SECRET');
       const refreshSecret = this.config.get<string>('JWT_REFRESH_SECRET');
-
-      console.log(AuthService.name);
 
       if (!accessSecret || !refreshSecret) {
         throw new Error('JWT secrets not configured');
@@ -73,24 +46,25 @@ export class AuthService {
         role: role,
         firstName: firstName,
         lastName: lastName,
+        avatar: avatar,
       };
 
       //* step 3: accesstoken and refreshtoken
       //! access token have payload
-      const accessToken = await this.jwt.signAsync(payload, {
+      const access_token = await this.jwt.signAsync(payload, {
         secret: accessSecret,
-        expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN') || '15m',
+        expiresIn: this.config.get<string>('JWT_ACCESS_EXPIRES_IN') || '5m',
       });
 
-      const refreshToken = await this.jwt.signAsync(
-        { sub: userId }, //! refresh token doesn't have payload
+      const refresh_token = await this.jwt.signAsync(
+        { userId: userId }, //! refresh token doesn't have payload
         {
           secret: refreshSecret,
           expiresIn: this.config.get<string>('JWT_REFRESH_EXPIRES_IN') || '7d',
         },
       );
 
-      return { accessToken, refreshToken };
+      return { access_token, refresh_token };
     } catch (error) {
       this.logger.error('Error in getting tokens', error);
       throw error;
@@ -127,11 +101,11 @@ export class AuthService {
         user.firstName,
         user.lastName,
       );
-      await this.updateRefreshToken(user.id, tokens.refreshToken);
+      await this.updateRefreshToken(user.id, tokens.refresh_token);
 
       return {
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
       };
     } catch (error) {
       this.logger.error('Error in refreshing tokens', error);
@@ -139,23 +113,30 @@ export class AuthService {
     }
   }
 
-  async signup(dto: Signup, res: Response) {
+  async signup(dto: Signup) {
     this.logger.info(
       `Signup attempt for email: ${dto.email}`,
       AuthService.name,
       // 'signup',
     );
     try {
+      // console.log('Dtos', dto);
+
       const hash = await argon2.hash(dto.password);
       this.logger.debug('Password hashed successfully');
+
+      //! Avatar url
+
+      const avatarURL = generateAvatar(dto.firstName, dto.email);
 
       const user = await this.prisma.user.create({
         data: {
           firstName: dto.firstName,
           lastName: dto.lastName,
           email: dto.email,
-          role: dto.role === 'ADMIN' ? 'ADMIN' : 'USER',
+          role: dto.role.toUpperCase() === 'ADMIN' ? 'ADMIN' : 'USER', //! ADMIN or USER
 
+          avatar: avatarURL,
           hash: hash,
         },
         select: {
@@ -164,6 +145,7 @@ export class AuthService {
           firstName: true,
           lastName: true,
           role: true,
+          avatar: true,
           createdAt: true,
         },
       });
@@ -175,17 +157,19 @@ export class AuthService {
         user.role,
         user.firstName,
         user.lastName,
+        user.avatar,
       );
+
       this.logger.log(`Tokens generated for user ID: ${user.id}`);
       // store hashed refresh token
-      await this.updateRefreshToken(user.id, tokens.refreshToken);
+      await this.updateRefreshToken(user.id, tokens.refresh_token);
 
       // Set refresh cookie
-      this.setRefreshCookie(res, tokens.refreshToken);
+      // this.setRefreshCookie(res, tokens.refreshToken);
       return {
         user,
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
       };
     } catch (error) {
       this.logger.error(
@@ -202,13 +186,21 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto, res: Response) {
+  async login(dto: LoginDto) {
     this.logger.debug(`Login attempt for email: ${dto.email}`);
     try {
       const user = await this.prisma.user.findUnique({
         where: { email: dto.email },
       });
       if (!user) throw new NotFoundException('User not found');
+
+      if (user.isDeleted) {
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: { isDeleted: false },
+        });
+        this.logger.info(`User restored successfully with id: ${user.id}`);
+      }
 
       this.logger.log(`User found with ID: ${user.id}`);
 
@@ -224,12 +216,12 @@ export class AuthService {
         user.firstName,
         user.lastName,
       );
-      await this.updateRefreshToken(user.id, tokens.refreshToken);
+      await this.updateRefreshToken(user.id, tokens.refresh_token);
 
       this.logger.log(`Tokens generated for user ID: ${user.id}`);
 
       // Set refresh cookie
-      this.setRefreshCookie(res, tokens.refreshToken);
+      // this.setRefreshCookie(res, tokens.refreshToken);
 
       const safeUser = {
         id: user.id,
@@ -241,8 +233,8 @@ export class AuthService {
 
       return {
         user: safeUser,
-        access_token: tokens.accessToken,
-        refresh_token: tokens.refreshToken,
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
       };
     } catch (error) {
       this.logger.error(
@@ -253,37 +245,49 @@ export class AuthService {
     }
   }
 
-  async logout(refresh_token: string) {
-    this.logger.info(`Logout attempt for user ID: ${refresh_token}`);
+  async logout(refreshToken: string) {
+    this.logger.info(`Logout attempt using refresh token`);
+
     try {
-      const payload = await this.jwt.verifyAsync(refresh_token, {
+      const payload = await this.jwt.verifyAsync(refreshToken, {
         secret: this.config.get<string>('JWT_REFRESH_SECRET'),
       });
 
-      if (!payload || typeof payload === 'string' || !payload.sub) {
+      console.log(payload);
+
+      if (!payload) {
         throw new ForbiddenException('Invalid token payload');
       }
 
-      const userId = payload.sub;
-      // Find user by refresh token
+      const userId = payload.userId;
+      console.log('user id', userId);
 
       const user = await this.prisma.user.findFirst({
-        where: { id: userId, refreshToken: { not: null } },
+        where: { id: userId },
       });
 
       if (!user) throw new NotFoundException('User not found');
 
+      if (!user.refreshToken) {
+        throw new ForbiddenException('No active session');
+      }
+
+      const isValid = await argon2.verify(user.refreshToken, refreshToken);
+      if (!isValid) {
+        throw new ForbiddenException(
+          'Token mismatch — possibly expired or reused',
+        );
+      }
+
       await this.prisma.user.update({
-        where: { id: user.id },
+        where: { id: userId },
         data: { refreshToken: null },
       });
-      this.logger.log(`Refresh token deleted for user email: ${user.email}`);
+
+      this.logger.log(`User ${user.email} successfully logged out`);
       return { success: true };
     } catch (error) {
-      this.logger.error(
-        'Error during logout',
-        error instanceof Error ? error.stack : '',
-      );
+      this.logger.error('Error during logout', error.stack);
       throw error;
     }
   }

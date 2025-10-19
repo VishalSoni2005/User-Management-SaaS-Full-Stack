@@ -24,6 +24,7 @@ export const signupSchema = z.object({
   role: z.enum(["ADMIN", "USER"], {
     error: "Please select a role",
   }),
+  avatar: z.string().optional().or(z.literal("")),
 });
 
 export const loginSchema = z.object({

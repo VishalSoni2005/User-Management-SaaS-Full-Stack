@@ -1,69 +1,151 @@
-export default function UserProfilePage({}) {
-  // Sample user data - replace with your actual data
-  const user = {
-    firstName: "John",
-    lastName: "Doe",
-    role: "Product Designer",
-    email: "john.doe@example.com",
-    joinedDate: "January 15, 2024",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
+"use client";
+
+import { useState } from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
+interface User {
+  firstName: string;
+  lastName?: string;
+  role: string;
+  email: string;
+  createdAt: string;
+  avatar?: string;
+}
+
+export default function UserCard({ user }: { user: User }) {
+  const [editableField, setEditableField] = useState<string | null>(null);
+  const [editedUser, setEditedUser] = useState<User>(user);
+  const [hasChanged, setHasChanged] = useState(false);
+
+  const handleFieldChange = (field: keyof User, value: string) => {
+    setEditedUser({ ...editedUser, [field]: value });
+
+    setHasChanged(true);
   };
 
+  const handleSave = () => {
+    console.log("Saving updated user:", editedUser);
+    setEditableField(null);
+    setHasChanged(false);
+  };
+
+  const joinedAt = new Date(user.createdAt).toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  const FieldBlock = ({
+    label,
+    field,
+    value,
+  }: {
+    label: string;
+    field: keyof User;
+    value?: string;
+  }) => (
+    <div
+      className="bg-zinc-900 rounded-lg p-4 border border-zinc-800 cursor-pointer hover:bg-zinc-800/60 transition"
+      onClick={() => setEditableField(field)}
+    >
+      <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
+        {label}
+      </p>
+
+      {editableField === field ? (
+        <Input
+          value={value ?? ""}
+          onChange={(e) => handleFieldChange(field, e.target.value)}
+          onBlur={() => setEditableField(null)}
+          className="bg-zinc-800 border-zinc-700 text-white focus-visible:ring-zinc-500"
+          autoFocus
+        />
+      ) : (
+        <p className="text-sm text-white">{value || "—"}</p>
+      )}
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Profile Card */}
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 overflow-hidden shadow-2xl">
-          {/* Header Background */}
-          <div className="h-32 bg-gradient-to-r from-zinc-800 to-zinc-900"></div>
+    <div className="min-h-screen min-w-screen overflow-x-hidden flex items-center justify-center bg-black p-4">
+      <Card className="w-full max-w-md bg-zinc-950 border border-zinc-800 text-white shadow-2xl rounded-2xl">
+        <CardHeader className="relative flex flex-col items-center pt-8">
+          <div className="absolute top-0 left-0 w-full h-28 bg-gradient-to-r from-zinc-800 to-zinc-900 rounded-t-2xl"></div>
 
-          {/* Profile Content */}
-          <div className="px-6 pb-6">
-            {/* Avatar */}
-            <div className="flex justify-center -mt-16 mb-4">
-              <img
-                src={user.avatar || "/placeholder.svg"}
-                alt={`${user.firstName} ${user.lastName}`}
-                className="w-32 h-32 rounded-full border-4 border-zinc-900 bg-zinc-800"
-              />
-            </div>
+          <Avatar className="w-28 h-28 border-4 border-zinc-950 z-10 mt-8">
+            <AvatarImage src={user.avatar} alt={user.firstName} />
+            <AvatarFallback className="bg-zinc-800 text-zinc-400 text-xl">
+              {user.firstName[0]}
+              {user.lastName?.[0]}
+            </AvatarFallback>
+          </Avatar>
 
-            {/* User Info */}
-            <div className="text-center mb-6">
-              <h1 className="text-2xl font-bold text-white mb-1">
-                {user.firstName} {user.lastName}
-              </h1>
-              <p className="text-sm font-medium text-zinc-400 mb-4">
-                {user.role}
-              </p>
-            </div>
+          <CardTitle className="text-2xl font-bold mt-4">
+            {editedUser.firstName} {editedUser.lastName ?? ""}
+          </CardTitle>
+          <CardDescription className="text-zinc-400 text-sm mt-1">
+            <Badge
+              variant="outline"
+              className="text-xs border-zinc-700 bg-zinc-900 text-zinc-300"
+            >
+              {editedUser.role}
+            </Badge>
+          </CardDescription>
+        </CardHeader>
 
-            {/* Info Grid */}
-            <div className="space-y-4">
-              {/* Email */}
-              <div className="bg-zinc-800 rounded-lg p-4 border border-zinc-700">
-                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
-                  Email
-                </p>
-                <p className="text-sm text-white break-all">{user.email}</p>
-              </div>
+        <Separator className="bg-zinc-800 my-4" />
 
-              {/* Joined Date */}
-              <div className="bg-zinc-800 rounded-lg p-4 border border-zinc-700">
-                <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
-                  Joined Us
-                </p>
-                <p className="text-sm text-white">{user.joinedDate}</p>
-              </div>
-            </div>
+        <CardContent className="space-y-4">
+          <FieldBlock
+            label="First Name"
+            field="firstName"
+            value={editedUser.firstName}
+          />
+          <FieldBlock
+            label="Last Name"
+            field="lastName"
+            value={editedUser.lastName}
+          />
+          <FieldBlock label="Email" field="email" value={editedUser.email} />
 
-            {/* Action Button */}
-            <button className="w-full mt-6 bg-white text-black font-semibold py-2 px-4 rounded-lg hover:bg-zinc-100 transition-colors duration-200">
-              Edit Profile
-            </button>
+
+          <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
+            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
+              Role
+            </p>
+            <p className="text-sm text-white">{editedUser.role}</p>
           </div>
-        </div>
-      </div>
+
+          <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
+            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">
+              Joined At
+            </p>
+            <p className="text-sm text-white">{joinedAt}</p>
+          </div>
+
+          {hasChanged && (
+            <div className="flex justify-center pt-2">
+              <Button
+                onClick={handleSave}
+                className="bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700"
+              >
+                Confirm Changes
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,24 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { getAccessToken } from "@/lib/auth";
-import { User } from "@/types/user.type";
-
-interface UserState {
-  users: User[];
-  total: number;
-  currentPage: number;
-  totalPages: number;
-  loading: boolean;
-  error: string | null;s
-}
-
-interface UpdateUser {
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: string;
-}
+import { getAccessToken } from "@/lib/get-access-toke.lib";
+import { UpdateUser, User, UserState } from "@/types/user.type";
+import { axiosInstance } from "@/api/axiosInstance";
 
 const initialState: UserState = {
   users: [],
@@ -27,6 +12,7 @@ const initialState: UserState = {
   totalPages: 1,
   loading: false,
   error: null,
+  currentUser: null,
 };
 
 export const fetchAllUsers = createAsyncThunk<
@@ -58,8 +44,8 @@ export const fetchAllUsers = createAsyncThunk<
 });
 
 export const deleteUser = createAsyncThunk<
-  string, 
-  string, 
+  string,
+  string,
   { rejectValue: string }
 >("user/deleteUser", async (userId, { rejectWithValue }) => {
   try {
@@ -74,7 +60,7 @@ export const deleteUser = createAsyncThunk<
     return rejectWithValue(message);
   }
 });
-// a)
+
 export const updateUser = createAsyncThunk<
   User, // Return type
   { id: string; data: UpdateUser },
@@ -82,8 +68,8 @@ export const updateUser = createAsyncThunk<
 >("user/updateUser", async ({ id, data }, { rejectWithValue }) => {
   try {
     const token = getAccessToken();
-    const res = await axios.put<{ data: User }>(
-      `http://localhost:4000/users/updateuser/${id}`,
+    const res = await axiosInstance.put<{ data: User }>(
+      `/users/updateuser/${id}`,
       data,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -95,7 +81,6 @@ export const updateUser = createAsyncThunk<
     }
 
     console.log("user after updation : ", res.data);
-    
 
     return res.data.data;
   } catch (err: any) {
@@ -117,7 +102,14 @@ const userSlice = createSlice({
     setUsers(state, action: PayloadAction<User[]>) {
       state.users = action.payload;
     },
+    setCurrentUser(state, action: PayloadAction<User>) {
+      state.currentUser = action.payload;
+    },
+    clearCurrentUser(state) {
+      state.currentUser = null;
+    },
   },
+  //! extraReducers for async thunks
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllUsers.pending, (state) => {
@@ -153,5 +145,6 @@ const userSlice = createSlice({
   },
 });
 
-export const { clearUsers, setUsers } = userSlice.actions;
+export const { clearUsers, setUsers, setCurrentUser, clearCurrentUser } =
+  userSlice.actions;
 export default userSlice.reducer;

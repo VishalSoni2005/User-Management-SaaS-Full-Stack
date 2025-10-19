@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { isAuthenticated } from "@/lib/auth";
+import { isAuthenticated } from "@/lib/get-access-toke.lib";
 import HomePageLoader from "@/styles/HomePageLoader";
 
 export default function RootPage() {
@@ -17,7 +17,7 @@ export default function RootPage() {
   }, [router]);
 
   return (
-    <HomePageLoader>
+    <HomePageLoader className="flex items-center justify-center h-screen">
       <svg className="pl" width={240} height={240} viewBox="0 0 240 240">
         <circle
           className="pl__ring pl__ring--a"

@@ -11,8 +11,12 @@ export class TripController {
     return this.tripService.createTrip(createTripDto);
   }
 
-  @Get()
-  getUserTrips(@Param('userId') userId : string) {
-    return this.
+  @Get('/:userId')
+  getUserTrips(@Param('userId') userId: string) {
+    return this.getUserTrips(userId);
+  }
+  @Get('summary/:userId')
+  async getTripSummary(@Param('userId') userId: string) {
+    return this.tripService.getTripSummary(userId);
   }
 }

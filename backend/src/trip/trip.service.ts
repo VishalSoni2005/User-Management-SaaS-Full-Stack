@@ -46,6 +46,7 @@ export class TripService {
       },
     });
 
+    // updating the user total points
     await this.prisma.user.update({
       where: { id: dto.userId },
       data: { totalPoints: { increment: pointsEarned } },
@@ -66,7 +67,6 @@ export class TripService {
     return { count: trips.length, trips };
   }
 
-  // 📊 Trip summary
   async getTripSummary(userId: string) {
     const trips = await this.prisma.trip.findMany({ where: { userId } });
     if (!trips.length) return { message: 'No trips found for this user' };

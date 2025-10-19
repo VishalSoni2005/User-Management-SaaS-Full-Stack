@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '@prisma/client';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class Signup {
   @ApiProperty({
@@ -23,6 +23,7 @@ export class Signup {
     example: 'LHd0K@example.com',
   })
   @IsEmail()
+  @IsNotEmpty()
   email: string;
 
   @ApiProperty({
@@ -38,4 +39,11 @@ export class Signup {
   })
   @IsString()
   role: Role;
+  @ApiProperty({
+    description: 'Optional avatar URL',
+    example: 'https://api.dicebear.com/9.x/avataaars/svg?seed=vishal',
+  })
+  @IsString()
+  @IsOptional()
+  avatar?: string;
 }

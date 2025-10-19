@@ -16,14 +16,22 @@ import {
 } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
-import { axiosInstance } from "@/api/axiosInstance";
+// import { axiosInstance } from "@/api/axiosInstance";
 import { useRouter } from "next/navigation";
 import type { LoginFormData } from "@/types";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/store/store";
+import { loginUser } from "@/store/features/authSlice";
+import { getPayload } from "@/lib/get-paload.lib";
+import { setCurrentUser } from "@/store/features/userSlice";
 
 export function LoginForm() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
   const [ServerError, setServerError] = useState<string | null>("");
+
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading } = useSelector((state: RootState) => state.auth);
 
   const {
     register,
@@ -32,34 +40,32 @@ export function LoginForm() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
-
   const onSubmitLogin = async (data: LoginFormData) => {
-    setIsLoading(true);
-    console.log("User login credential: ", data);
-
+    setServerError(null);
     try {
-      const res = await axiosInstance.post(
-        "http://localhost:4000/auth/login",
-        data
-      );
+      // Dispatch login thunk and get token
+      const res = await dispatch(loginUser(data)).unwrap();
 
-      console.log(res.data.message);
-      localStorage.setItem("access_token", res.data.access_token);
+      console.log(res.user, res.access_token);
+
+      localStorage.setItem("access_token", res.access_token);
+
+      const payload = getPayload();
+
+      // Set user in Redux userSlice
+      if (payload) dispatch(setCurrentUser(payload));
+
       router.push("/dashboard");
-    } catch (error: any) {
-      console.log("Error in onSubmitLogin", error);
-
-      if (error.response?.data?.message) {
-        setServerError(
-          Array.isArray(error.response.data.message)
-            ? error.response.data.message[0]
-            : error.response.data.message
-        );
+    } catch (err: any) {
+      // Handle errors
+      console.error("Login failed:", err);
+      if (typeof err === "string") {
+        setServerError(err);
+      } else if (err?.message) {
+        setServerError(err.message);
       } else {
         setServerError("Something went wrong. Please try again.");
       }
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -84,7 +90,6 @@ export function LoginForm() {
               placeholder="john.doe@example.com"
               {...register("email")}
               className={errors.email ? "border-destructive" : ""}
-              
             />
             {errors.email && (
               <p className="text-sm text-destructive">{errors.email.message}</p>
@@ -124,12 +129,13 @@ export function LoginForm() {
           {ServerError && (
             <p className="text-sm text-destructive">{ServerError}</p>
           )}
+
           <Button
             type="submit"
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? (
+            {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Logging in...

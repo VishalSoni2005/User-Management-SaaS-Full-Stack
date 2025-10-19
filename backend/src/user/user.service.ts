@@ -52,7 +52,7 @@ export class UsersService {
     }
   }
 
-  async findAll(query: FindAllUsersQueryDto) {
+  async findAll(query: FindAllUsersQueryDto, ) {
     const {
       page = 1,
       limit = 10,
@@ -64,7 +64,7 @@ export class UsersService {
 
     const skip = (Number(page) - 1) * Number(limit);
 
-    const where: any = {};
+    const where: any = { isDeleted: false };
 
     if (role) {
       where.role = role;
@@ -98,8 +98,9 @@ export class UsersService {
       });
 
       const total = await this.prisma.user.count({ where });
+      console.log('total', total);
 
-      if (users.length === 0) throw new NotFoundException('No users found');
+      if (total === 0) throw new NotFoundException('No users found');
 
       return {
         data: users,
@@ -173,7 +174,15 @@ export class UsersService {
   async removeById(id: string) {
     this.logger.info(`Delete user by id attempt: ${id}`);
     try {
-      await this.prisma.user.delete({ where: { id } });
+      // await this.prisma.user.delete({ where: { id } });
+      // this.logger.info(`User deleted successfully with id: ${id}`);
+      // return { success: true };
+
+      await this.prisma.user.update({
+        where: { id },
+        data: { isDeleted: true },
+      });
+
       this.logger.info(`User deleted successfully with id: ${id}`);
       return { success: true };
     } catch (error) {

@@ -1,4 +1,4 @@
-const logMsg: any = {
+export const logMsg: any = {
   error: 'Error',
   warn: 'Warn',
   info: 'Info',

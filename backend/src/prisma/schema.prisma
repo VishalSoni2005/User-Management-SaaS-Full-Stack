@@ -19,9 +19,13 @@ model User {
 
   refreshToken String?
 
+  isDeleted Boolean @default(false)
+
   firstName   String
   lastName    String?
   totalPoints Int     @default(0)
+
+  avatar       String   @default("https://api.dicebear.com/9.x/notionists/svg?seed=default")
 
   trips       Trip[]
   redemptions Redemption[]

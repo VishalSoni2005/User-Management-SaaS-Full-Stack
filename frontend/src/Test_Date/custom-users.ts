@@ -8,7 +8,7 @@ interface User {
   avatar: string;
 }
 
-export const users: User[] = [
+export const SampleUsers: User[] = [
   {
     id: "1",
     firstName: "John",
