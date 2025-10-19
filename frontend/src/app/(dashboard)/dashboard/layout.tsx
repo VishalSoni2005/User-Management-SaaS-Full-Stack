@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { setCurrentUser } from "@/store/features/userSlice";
 import UserCard from "@/components/UserCard";
+import LeaderboardButton from "@/components/LeaderboardBtn";
 
 export default function DashboardLayout({
   children,
@@ -44,10 +45,7 @@ export default function DashboardLayout({
       <div className="min-h-screen bg-gray-50 flex flex-col overflow-x-hidden">
         {/* Header */}
         <header className="bg-slate-950 text-white flex justify-between items-center px-8 py-4 shadow-md border-b border-green-900">
-          <h1 className="text-2xl font-semibold">
-            Welcome, {currentUser.firstName} {currentUser.lastName || ""}
-          </h1>
-          <div className="flex items-center space-x-4">
+          <div className="flex  justify-center items-center gap-4">
             <Image
               unoptimized
               width={40}
@@ -56,6 +54,12 @@ export default function DashboardLayout({
               alt="avatar"
               className="rounded-full border-2 border-white"
             />
+            <h1 className="text-2xl font-semibold">
+              Welcome, {currentUser.firstName} {currentUser.lastName || ""}
+            </h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <LeaderboardButton />
             <LogoutButton className="bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition" />
           </div>
         </header>

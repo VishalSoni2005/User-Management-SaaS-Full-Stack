@@ -13,20 +13,16 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { User } from "@/types";
 
-interface User {
-  firstName: string;
-  lastName?: string;
-  role: string;
-  email: string;
-  createdAt: string;
-  avatar?: string;
-}
 
 export default function UserCard({ user }: { user: User }) {
   const [editableField, setEditableField] = useState<string | null>(null);
   const [editedUser, setEditedUser] = useState<User>(user);
   const [hasChanged, setHasChanged] = useState(false);
+
+  console.log("user", user);
+  
 
   const handleFieldChange = (field: keyof User, value: string) => {
     setEditedUser({ ...editedUser, [field]: value });

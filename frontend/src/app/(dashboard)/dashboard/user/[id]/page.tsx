@@ -1,46 +1,51 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import React from "react";
 import axios from "axios";
-import { cookies } from "next/headers";
+import { useEffect, useState } from "react";
 import UserCard from "@/components/UserCard";
 import NotFound from "@/components/NotFoundError";
 
-export default async function UserPage({ params }: { params: { id: string } }) {
-  try {
-    // Get the cookie store (server-side)
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
+export default function UserPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const unwrappedParams = React.use(params); // ✅ unwrap the Promise
+  const { id } = unwrappedParams; // extract the id safely
 
-    if (!token) {
-      throw new Error("No access token found in cookies");
-    }
+  const [user, setUser] = useState<any>(null);
+  const [error, setError] = useState("");
 
-    // Axios request (server-side)
-    const res = await axios.get(`http://localhost:4000/users/${params.id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) throw new Error("No token found");
 
-    if (res.status === 401) {
-      throw new Error("Unauthorized: Invalid token");
-    }
+        const res = await axios.get(`http://localhost:4000/users/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-    const user = res.data;
-    console.log('user', user);
-    
+        setUser(res.data);
+        console.log("user", res.data);
+      } catch (err: any) {
+        console.error("Error fetching user:", err.message);
+        setError(err.message);
+      }
+    };
 
-    if (!user) {
-      throw new Error("User not found");
-    }
+    fetchUser();
+  }, [id]);
 
-    return <UserCard user={user} />;
-  } catch (error: any) {
-    console.log("Error fetching user:", error.message);
-
+  if (error) {
     return (
-      <div className="min-h-screen min-w-screen flex justify-center items-center bg-black ">
+      <div className="min-h-screen min-w-screen flex justify-center items-center bg-black">
         <NotFound />
       </div>
     );
   }
+
+  return user ? <UserCard user={user} /> : <p>Loading...</p>;
 }

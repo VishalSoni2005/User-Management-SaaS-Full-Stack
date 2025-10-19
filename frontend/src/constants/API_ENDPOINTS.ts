@@ -1,4 +1,4 @@
-const API_ENDPOINT = {
+export const API_ENDPOINT = {
   BASE_URL: "http://localhost:4000",
   GET_ALL_USERS: "/users/getallusers",
   CREATE_USER: "/users",

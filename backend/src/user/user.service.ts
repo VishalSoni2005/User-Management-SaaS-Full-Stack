@@ -52,7 +52,7 @@ export class UsersService {
     }
   }
 
-  async findAll(query: FindAllUsersQueryDto, ) {
+  async findAll(query: FindAllUsersQueryDto) {
     const {
       page = 1,
       limit = 10,
@@ -129,6 +129,7 @@ export class UsersService {
           role: true,
           createdAt: true,
           updatedAt: true,
+          avatar: true,
         },
       });
 

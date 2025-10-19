@@ -98,9 +98,7 @@ export default function AdminDashboard() {
       header: "Actions",
       cell: (info) => (
         <div className="flex gap-2">
-          <button className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-blue-400 hover:text-blue-300">
-            <Edit2 size={16} />
-          </button>
+          
           <button className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-red-400 hover:text-red-300">
             <Trash2 size={16} />
           </button>

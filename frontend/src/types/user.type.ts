@@ -6,6 +6,8 @@ export interface User {
   role: "ADMIN" | "USER";
   avatar: string;
   createdAt: string; // ISO date string
+
+  totalPoints?: number;
 }
 
 export interface UserPayload {

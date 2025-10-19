@@ -1,33 +1,7 @@
-  'use client';
 import styled from "styled-components";
 
 const NotFoundStyle = styled.div`
-  /* From Uiverse.io by Praashoo7 Design Inspired by Stefan Devai's Design on Dribble */
-
-  .text_404 {
-    position: absolute;
-    display: flex;
-    flex-direction: row;
-    column-gap: 6em;
-    z-index: -5;
-    margin-bottom: 2em;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.5;
-    font-family: Montserrat;
-  }
-
-  .text_4041 {
-    transform: scaleY(24.5) scaleX(9);
-  }
-
-  .text_4042 {
-    transform: scaleY(24.5) scaleX(9);
-  }
-
-  .text_4043 {
-    transform: scaleY(24.5) scaleX(9);
-  }
+  /* Design Inspired by one of Stefan Devai's Design on Dribble */
 
   .main_wrapper {
     display: flex;
@@ -55,7 +29,6 @@ const NotFoundStyle = styled.div`
     margin-left: 0em;
     z-index: -1;
   }
-
   .antenna_shadow {
     position: absolute;
     background-color: transparent;
@@ -68,7 +41,6 @@ const NotFoundStyle = styled.div`
     box-shadow: inset 0px 16px #a85103, inset 0px 16px 1px 1px #a85103;
     -moz-box-shadow: inset 0px 16px #a85103, inset 0px 16px 1px 1px #a85103;
   }
-
   .antenna::after {
     content: "";
     position: absolute;
@@ -80,7 +52,6 @@ const NotFoundStyle = styled.div`
     border-radius: 50%;
     background-color: #f69e50;
   }
-
   .antenna::before {
     content: "";
     position: absolute;
@@ -92,7 +63,6 @@ const NotFoundStyle = styled.div`
     border-radius: 50%;
     background-color: #f69e50;
   }
-
   .a1 {
     position: relative;
     top: -102%;
@@ -110,7 +80,6 @@ const NotFoundStyle = styled.div`
     transform: rotate(-29deg);
     clip-path: polygon(50% 0%, 49% 100%, 52% 100%);
   }
-
   .a1d {
     position: relative;
     top: -211%;
@@ -123,7 +92,6 @@ const NotFoundStyle = styled.div`
     background-color: #979797;
     z-index: 99;
   }
-
   .a2 {
     position: relative;
     top: -210%;
@@ -152,7 +120,6 @@ const NotFoundStyle = styled.div`
     );
     transform: rotate(-8deg);
   }
-
   .a2d {
     position: relative;
     top: -294%;
@@ -165,6 +132,16 @@ const NotFoundStyle = styled.div`
     z-index: 99;
   }
 
+  .notfound_text {
+    background-color: black;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
+    font-size: 0.75em;
+    color: white;
+    letter-spacing: 0;
+    border-radius: 5px;
+    z-index: 10;
+  }
   .tv {
     width: 17em;
     height: 9em;
@@ -176,7 +153,6 @@ const NotFoundStyle = styled.div`
     border: 2px solid #1d0e01;
     box-shadow: inset 0.2em 0.2em #e69635;
   }
-
   .tv::after {
     content: "";
     position: absolute;
@@ -193,7 +169,6 @@ const NotFoundStyle = styled.div`
     background-blend-mode: difference;
     opacity: 0.09;
   }
-
   .curve_svg {
     position: absolute;
     margin-top: 0.25em;
@@ -201,7 +176,6 @@ const NotFoundStyle = styled.div`
     height: 12px;
     width: 12px;
   }
-
   .display_div {
     display: flex;
     align-items: center;
@@ -210,13 +184,12 @@ const NotFoundStyle = styled.div`
     border-radius: 15px;
     box-shadow: 3.5px 3.5px 0px #e69635;
   }
-
   .screen_out {
     width: auto;
     height: auto;
+
     border-radius: 10px;
   }
-
   .screen_out1 {
     width: 11em;
     height: 7.75em;
@@ -224,6 +197,27 @@ const NotFoundStyle = styled.div`
     align-items: center;
     justify-content: center;
     border-radius: 10px;
+  }
+  .screen {
+    width: 13em;
+    height: 7.85em;
+    font-family: Montserrat;
+    border: 2px solid #1d0e01;
+    background: repeating-radial-gradient(#000 0 0.0001%, #ffffff 0 0.0002%) 50%
+        0/2500px 2500px,
+      repeating-conic-gradient(#000 0 0.0001%, #ffffff 0 0.0002%) 60% 60%/2500px
+        2500px;
+    background-blend-mode: difference;
+    animation: b 0.2s infinite alternate;
+    border-radius: 10px;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #252525;
+    letter-spacing: 0.15em;
+    text-align: center;
   }
 
   .screenM {
@@ -260,7 +254,6 @@ const NotFoundStyle = styled.div`
     text-align: center;
     overflow: hidden;
   }
-
   .screenM:before,
   .screenM:after {
     content: "";
@@ -269,7 +262,6 @@ const NotFoundStyle = styled.div`
     z-index: 1;
     width: 100%;
   }
-
   .screenM:before {
     top: 0;
     height: 68.4782608696%;
@@ -291,7 +283,6 @@ const NotFoundStyle = styled.div`
       #002bb2 100%
     );
   }
-
   .screenM:after {
     bottom: 0;
     height: 21.7391304348%;
@@ -312,23 +303,56 @@ const NotFoundStyle = styled.div`
     );
   }
 
-  .notfound_text {
-    background-color: black;
-    padding-left: 0.3em;
-    padding-right: 0.3em;
-    font-size: 0.75em;
-    color: white;
-    letter-spacing: 0;
-    border-radius: 5px;
-    z-index: 10;
+  @keyframes b {
+    100% {
+      background-position: 50% 0, 60% 50%;
+    }
   }
+
+  /* Another Error Screen to Use 
+
+  .screen {
+    width: 13em;
+    height: 7.85em;
+    position: relative;
+    background: linear-gradient(to right, #002fc6 0%, #002bb2 14.2857142857%, #3a3a3a 14.2857142857%, #303030 28.5714285714%, #ff0afe 28.5714285714%, #f500f4 42.8571428571%, #6c6c6c 42.8571428571%, #626262 57.1428571429%, #0affd9 57.1428571429%, #00f5ce 71.4285714286%, #3a3a3a 71.4285714286%, #303030 85.7142857143%, white 85.7142857143%, #fafafa 100%);
+    border-radius: 10px;
+    border: 2px solid black;
+    z-index: 99;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #252525;
+    letter-spacing: 0.15em;
+    text-align: center;
+    overflow: hidden;
+  }
+  .screen:before, .screen:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+  }
+  .screen:before {
+    top: 0;
+    height: 68.4782608696%;
+    background: linear-gradient(to right, white 0%, #fafafa 14.2857142857%, #ffe60a 14.2857142857%, #f5dc00 28.5714285714%, #0affd9 28.5714285714%, #00f5ce 42.8571428571%, #10ea00 42.8571428571%, #0ed600 57.1428571429%, #ff0afe 57.1428571429%, #f500f4 71.4285714286%, #ed0014 71.4285714286%, #d90012 85.7142857143%, #002fc6 85.7142857143%, #002bb2 100%);
+  }
+  .screen:after {
+    bottom: 0;
+    height: 21.7391304348%;
+    background: linear-gradient(to right, #006c6b 0%, #005857 16.6666666667%, white 16.6666666667%, #fafafa 33.3333333333%, #001b75 33.3333333333%, #001761 50%, #6c6c6c 50%, #626262 66.6666666667%, #929292 66.6666666667%, #888888 83.3333333333%, #3a3a3a 83.3333333333%, #303030 100%);
+  }
+
+    */
 
   .lines {
     display: flex;
     column-gap: 0.1em;
     align-self: flex-end;
   }
-
   .line1,
   .line3 {
     width: 2px;
@@ -337,7 +361,6 @@ const NotFoundStyle = styled.div`
     border-radius: 25px 25px 0px 0px;
     margin-top: 0.5em;
   }
-
   .line2 {
     flex-grow: 1;
     width: 2px;
@@ -361,9 +384,7 @@ const NotFoundStyle = styled.div`
     row-gap: 0.75em;
     box-shadow: 3px 3px 0px #e69635;
   }
-
-  .b1,
-  .b2 {
+  .b1 {
     width: 1.65em;
     height: 1.65em;
     border-radius: 50%;
@@ -372,7 +393,6 @@ const NotFoundStyle = styled.div`
     box-shadow: inset 2px 2px 1px #b49577, -2px 0px #513721,
       -2px 0px 0px 1px black;
   }
-
   .b1::before {
     content: "";
     position: absolute;
@@ -384,7 +404,6 @@ const NotFoundStyle = styled.div`
     height: 0.4em;
     background-color: #000000;
   }
-
   .b1::after {
     content: "";
     position: absolute;
@@ -396,7 +415,6 @@ const NotFoundStyle = styled.div`
     height: 0.55em;
     background-color: #000000;
   }
-
   .b1 div {
     content: "";
     position: absolute;
@@ -407,7 +425,15 @@ const NotFoundStyle = styled.div`
     height: 1.5em;
     background-color: #000000;
   }
-
+  .b2 {
+    width: 1.65em;
+    height: 1.65em;
+    border-radius: 50%;
+    background-color: #7f5934;
+    border: 2px solid black;
+    box-shadow: inset 2px 2px 1px #b49577, -2px 0px #513721,
+      -2px 0px 0px 1px black;
+  }
   .b2::before {
     content: "";
     position: absolute;
@@ -419,7 +445,6 @@ const NotFoundStyle = styled.div`
     height: 0.4em;
     background-color: #000000;
   }
-
   .b2::after {
     content: "";
     position: absolute;
@@ -430,19 +455,16 @@ const NotFoundStyle = styled.div`
     height: 1.5em;
     background-color: #000000;
   }
-
   .speakers {
     display: flex;
     flex-direction: column;
     row-gap: 0.5em;
   }
-
   .speakers .g1 {
     display: flex;
     column-gap: 0.25em;
   }
-
-  .speakers .g11,
+  .speakers .g1 .g11,
   .g12,
   .g13 {
     width: 0.65em;
@@ -452,7 +474,6 @@ const NotFoundStyle = styled.div`
     border: 2px solid black;
     box-shadow: inset 1.25px 1.25px 1px #b49577;
   }
-
   .speakers .g {
     width: auto;
     height: 2px;
@@ -467,8 +488,14 @@ const NotFoundStyle = styled.div`
     justify-content: center;
     column-gap: 8.7em;
   }
-
-  .base1,
+  .base1 {
+    height: 1em;
+    width: 2em;
+    border: 2px solid #171717;
+    background-color: #4d4d4d;
+    margin-top: -0.15em;
+    z-index: -1;
+  }
   .base2 {
     height: 1em;
     width: 2em;
@@ -477,13 +504,77 @@ const NotFoundStyle = styled.div`
     margin-top: -0.15em;
     z-index: -1;
   }
-
   .base3 {
     position: absolute;
     height: 0.15em;
     width: 17.5em;
     background-color: #171717;
     margin-top: 0.8em;
+  }
+
+  .text_404 {
+    position: absolute;
+    display: flex;
+    flex-direction: row;
+    column-gap: 6em;
+    z-index: -5;
+    margin-bottom: 2em;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    font-family: Montserrat;
+  }
+  .text_4041 {
+    transform: scaleY(24.5) scaleX(9);
+  }
+  .text_4042 {
+    transform: scaleY(24.5) scaleX(9);
+  }
+  .text_4043 {
+    transform: scaleY(24.5) scaleX(9);
+  }
+
+  @media only screen and (max-width: 495px) {
+    .text_404 {
+      column-gap: 6em;
+    }
+  }
+  @media only screen and (max-width: 395px) {
+    .text_404 {
+      column-gap: 4em;
+    }
+    .text_4041 {
+      transform: scaleY(25) scaleX(8);
+    }
+    .text_4042 {
+      transform: scaleY(25) scaleX(8);
+    }
+    .text_4043 {
+      transform: scaleY(25) scaleX(8);
+    }
+  }
+
+  @media (max-width: 275px), (max-height: 520px) {
+    .main {
+      position: relative;
+    }
+  }
+
+  @media only screen and (max-width: 1024px) {
+    .screenM {
+      display: flex;
+    }
+    .screen {
+      display: none;
+    }
+  }
+  @media only screen and (min-width: 1025px) {
+    .screen {
+      display: flex;
+    }
+    .screenM {
+      display: none;
+    }
   }
 `;
 
