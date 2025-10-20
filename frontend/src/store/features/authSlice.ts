@@ -11,6 +11,8 @@ export const loginUser = createAsyncThunk<
 >("auth/loginUser", async (data, { rejectWithValue }) => {
   try {
     const res = await axiosInstance.post("/auth/login", data);
+
+    console.log(" response from backend to login create async thuk: ",res.data);
     return { user: res.data.user, access_token: res.data.access_token };
   } catch (err: any) {
     const message =

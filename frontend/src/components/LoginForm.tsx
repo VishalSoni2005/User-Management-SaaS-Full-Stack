@@ -14,7 +14,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
 // import { axiosInstance } from "@/api/axiosInstance";
 import { useRouter } from "next/navigation";
@@ -27,6 +27,8 @@ import { setCurrentUser } from "@/store/features/userSlice";
 
 export function LoginForm() {
   const router = useRouter();
+
+  const [showPassword, setShowPassword] = useState(false);
   // const [isLoading, setIsLoading] = useState(false);
   const [ServerError, setServerError] = useState<string | null>("");
 
@@ -69,6 +71,16 @@ export function LoginForm() {
     }
   };
 
+  const validateEmail = (value: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!value) return "Email is required";
+    return emailRegex.test(value) || "Invalid email format";
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <Card className="w-full mt-16 h-auto max-w-md border-2">
       <CardHeader className="space-y-2">
@@ -84,11 +96,15 @@ export function LoginForm() {
             <Label htmlFor="email" className="text-sm font-medium">
               Email
             </Label>
+
             <Input
               id="email"
-              type="email"
+              type="text"
               placeholder="john.doe@example.com"
-              {...register("email")}
+              {...register("email", {
+                required: true,
+                validate: validateEmail,
+              })}
               className={errors.email ? "border-destructive" : ""}
             />
             {errors.email && (
@@ -101,13 +117,31 @@ export function LoginForm() {
             <Label htmlFor="password" className="text-sm font-medium">
               Password
             </Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              {...register("password")}
-              className={errors.password ? "border-destructive" : ""}
-            />
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Enter your password"
+                {...register("password", {
+                  required: "Password is required",
+                })}
+                className={`pr-10 ${
+                  errors.password ? "border-destructive" : ""
+                }`}
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+              >
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </button>
+            </div>
+           
             {errors.password && (
               <p className="text-sm text-destructive">
                 {errors.password.message}

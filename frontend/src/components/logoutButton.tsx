@@ -9,7 +9,7 @@ export const LogoutButton = ({ className }: { className?: string }) => {
   return (
     <div>
       <Button
-        className={`bg-destructive hover:bg-destructive/90 text-white ${className}`}
+        className={` bg-gray-950 hover:bg-destructive/90 text-white ${className}`}
         onClick={handleLogout}
       >
         Logout

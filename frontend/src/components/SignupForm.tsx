@@ -69,6 +69,12 @@ export function SignupForm() {
     }
   };
 
+  const validateEmail = (value: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!value) return "Email is required";
+    return emailRegex.test(value) || "Invalid email format";
+  };
+
   return (
     <Card className="w-full mt-16 h-auto max-w-md border-2">
       <CardHeader className="space-y-2">
@@ -122,14 +128,17 @@ export function SignupForm() {
 
           {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium">
+            <Label htmlFor="text" className="text-sm font-medium">
               Email <span className="text-destructive">*</span>
             </Label>
             <Input
               id="email"
-              type="email"
+              type="text"
               placeholder="yolo@example.com"
-              {...register("email")}
+              {...register("email", {
+                required: true,
+                validate: validateEmail,
+              })}
               className={errors.email ? "border-destructive" : ""}
             />
             {errors.email && (

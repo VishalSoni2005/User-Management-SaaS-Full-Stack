@@ -49,6 +49,8 @@ export class AuthService {
         avatar: avatar,
       };
 
+      console.log('payload', payload);
+
       //* step 3: accesstoken and refreshtoken
       //! access token have payload
       const access_token = await this.jwt.signAsync(payload, {
@@ -215,6 +217,7 @@ export class AuthService {
         user.role,
         user.firstName,
         user.lastName,
+        user.avatar,
       );
       await this.updateRefreshToken(user.id, tokens.refresh_token);
 
@@ -229,6 +232,8 @@ export class AuthService {
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
+        avatar: user.avatar,
+        createdAt: user.createdAt,
       };
 
       return {

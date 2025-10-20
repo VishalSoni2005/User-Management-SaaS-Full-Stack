@@ -7,6 +7,8 @@ const LeaderboardButton = () => {
   const router = useRouter();
 
   const handleClick = () => {
+    console.log('btn clicked: ');
+    
     router.push("/dashboard/leaderboard");
   }
   return (

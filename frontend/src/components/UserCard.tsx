@@ -15,20 +15,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { User } from "@/types";
 
-
 export default function UserCard({ user }: { user: User }) {
   const [editableField, setEditableField] = useState<string | null>(null);
   const [editedUser, setEditedUser] = useState<User>(user);
   const [hasChanged, setHasChanged] = useState(false);
-
-  console.log("user", user);
-  
 
   const handleFieldChange = (field: keyof User, value: string) => {
     setEditedUser({ ...editedUser, [field]: value });
 
     setHasChanged(true);
   };
+
+  console.log("User From UserCard", user);
 
   const handleSave = () => {
     console.log("Saving updated user:", editedUser);
@@ -74,7 +72,7 @@ export default function UserCard({ user }: { user: User }) {
   );
 
   return (
-    <div className="min-h-screen min-w-screen overflow-x-hidden flex items-center justify-center bg-black p-4">
+    <div className="min-h-screen w-full overflow-x-hidden flex items-center justify-center bg-black p-4">
       <Card className="w-full max-w-md bg-zinc-950 border border-zinc-800 text-white shadow-2xl rounded-2xl">
         <CardHeader className="relative flex flex-col items-center pt-8">
           <div className="absolute top-0 left-0 w-full h-28 bg-gradient-to-r from-zinc-800 to-zinc-900 rounded-t-2xl"></div>
@@ -114,7 +112,6 @@ export default function UserCard({ user }: { user: User }) {
             value={editedUser.lastName}
           />
           <FieldBlock label="Email" field="email" value={editedUser.email} />
-
 
           <div className="bg-zinc-900 rounded-lg p-4 border border-zinc-800">
             <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-1">

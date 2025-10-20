@@ -4,10 +4,22 @@ export interface User {
   lastName?: string; // optional if not always present
   email: string;
   role: "ADMIN" | "USER";
+  createdAt: string; // ISO date string
+
+  avatar: string;
+  totalPoints: number;
+}
+export interface LeaderboardUser {
+  id: string;
+  firstName: string;
+  lastName?: string; // optional if not always present
+  email: string;
+  role: "ADMIN" | "USER";
   avatar: string;
   createdAt: string; // ISO date string
 
-  totalPoints?: number;
+  rank: number;
+  totalPoints: number;
 }
 
 export interface UserPayload {
@@ -17,6 +29,7 @@ export interface UserPayload {
   email: string;
   role: "ADMIN" | "USER";
   avatar: string;
+  totalPoints: number;
   createdAt: string;
 }
 
@@ -26,7 +39,7 @@ export interface UserState {
   currentPage: number;
   totalPages: number;
   loading: boolean;
-  currentUser: User | null; 
+  currentUser: User | null;
   error: string | null;
 }
 

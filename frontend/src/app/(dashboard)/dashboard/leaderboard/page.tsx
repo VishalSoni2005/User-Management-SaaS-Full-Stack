@@ -23,11 +23,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import { columns, data } from "@/components/tables/user-column";
+import { columns } from "@/components/tables/user-column";
 import { HashIcon } from "lucide-react";
+import { LeaderboardUser } from "@/types";
+import sortedData from "@/Test_Date/custom-users";
+import { Separator } from "@/components/ui/separator";
 
-export function DataTableDemo() {
+export const data: LeaderboardUser[] = sortedData;
+
+export function Page() {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
@@ -54,18 +58,28 @@ export function DataTableDemo() {
       rowSelection,
     },
     initialState: {
-      sorting: [{ id: "totalPoints", desc: false }],
-    }
+      sorting: [{ id: "totalPoints", desc: true }],
+    },
   });
 
   return (
-    <div className="min-h-screen min-w-screen bg-background  text-foreground p-4 md:px-16">
+    <div className="min-h-screen w-full bg-background  text-foreground p-4 md:px-16">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">
-          Our Top Leaderboard Members
+        <h1 className="text-3xl font-bold text-white mb-2 italic serif">
+          The Attento Elite
+          <Separator
+            decorative={true}
+            
+            orientation="horizontal"
+            color="white"
+          />
         </h1>
 
-        <p className="text-zinc-400 flex"> <HashIcon className="" size={20} />Safe Driving Pays Off</p>
+        <p className="text-zinc-400 flex">
+          {" "}
+          <HashIcon className="" size={20} />
+          Safe Driving Pays Off
+        </p>
       </div>
       <div className="overflow-x-auto rounded-xl border border-border shadow-sm bg-card">
         <Table className="min-w-full text-sm md:text-base">
@@ -153,4 +167,4 @@ export function DataTableDemo() {
   );
 }
 
-export default DataTableDemo;
+export default Page;

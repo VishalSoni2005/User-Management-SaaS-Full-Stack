@@ -1,4 +1,4 @@
-import { User } from "@/types";
+import { LeaderboardUser, User } from "@/types";
 
 export const custom_data: User[] = [
   {
@@ -233,4 +233,11 @@ export const custom_data: User[] = [
   },
 ];
 
-export default custom_data;
+const sortedData : LeaderboardUser[] = custom_data
+  .sort((a, b) => b.totalPoints - a.totalPoints)
+  .map((user, index) => ({
+    ...user,
+    rank: index + 1, // 1-based rank
+  }));
+
+export default sortedData;
