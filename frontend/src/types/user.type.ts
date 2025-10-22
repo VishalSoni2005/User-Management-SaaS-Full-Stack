@@ -1,10 +1,10 @@
 export interface User {
   id: string;
   firstName: string;
-  lastName?: string; // optional if not always present
+  lastName?: string;
   email: string;
   role: "ADMIN" | "USER";
-  createdAt: string; // ISO date string
+  createdAt: string;
 
   avatar: string;
   totalPoints: number;
@@ -12,11 +12,11 @@ export interface User {
 export interface LeaderboardUser {
   id: string;
   firstName: string;
-  lastName?: string; // optional if not always present
+  lastName?: string;
   email: string;
   role: "ADMIN" | "USER";
   avatar: string;
-  createdAt: string; // ISO date string
+  createdAt: string;
 
   rank: number;
   totalPoints: number;
@@ -25,9 +25,11 @@ export interface LeaderboardUser {
 export interface UserPayload {
   id: string;
   firstName: string;
-  lastName?: string; // optional if not always present
+  lastName?: string;
   email: string;
   role: "ADMIN" | "USER";
+  exp: number;
+
   avatar: string;
   totalPoints: number;
   createdAt: string;

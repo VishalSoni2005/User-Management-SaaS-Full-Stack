@@ -99,6 +99,7 @@ export class AuthService {
       const tokens = await this.getTokens(
         user.id,
         user.email,
+        user.avatar,
         user.role,
         user.firstName,
         user.lastName,

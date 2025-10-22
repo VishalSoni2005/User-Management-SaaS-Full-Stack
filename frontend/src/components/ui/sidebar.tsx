@@ -152,8 +152,8 @@ function SidebarProvider({
 }
 
 function Sidebar({
-  side = "left",
-  variant = "sidebar",
+  side = "left", //!
+  variant = "inset",
   collapsible = "offcanvas",
   className,
   children,

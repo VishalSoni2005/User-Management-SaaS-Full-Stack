@@ -17,6 +17,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { useSelector } from "react-redux"
+import { RootState } from "@/store/store"
 
 export function NavMain({
   items,
@@ -32,9 +34,11 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const currentUser = useSelector((state: RootState) => state.user.currentUser);
+  if(!currentUser) return null
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Options for {currentUser.firstName}</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible

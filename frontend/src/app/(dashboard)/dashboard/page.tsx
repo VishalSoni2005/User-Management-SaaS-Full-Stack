@@ -23,7 +23,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "@/store/store";
-import { fetchAllUsers } from "@/store/features/userSlice";
+import { deleteUser, fetchAllUsers } from "@/store/features/userSlice";
 import UserCard from "@/components/UserCard";
 
 const columnHelper = createColumnHelper<any>();
@@ -38,6 +38,12 @@ export default function AdminDashboard() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
+
+  const handleDelete = (id: string) => {
+    console.log("id from handleDelete", id);
+
+    dispatch(deleteUser(id));
+  };
 
   const columns = [
     columnHelper.accessor("id", {
@@ -95,7 +101,10 @@ export default function AdminDashboard() {
       header: "Actions",
       cell: () => (
         <div className="flex gap-2">
-          <button className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-red-400 hover:text-red-300">
+          <button
+            onClick={() => handleDelete}
+            className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-red-400 hover:text-red-300"
+          >
             <Trash2 size={16} />
           </button>
         </div>
@@ -129,10 +138,8 @@ export default function AdminDashboard() {
     dispatch(fetchAllUsers({ limit: 20, page: 1 }));
   }, [dispatch]);
 
-  // ✅ FIX: Safely handle null currentUser
   if (!currentUser) return null;
 
-  // ✅ FIX: Wrap conditional JSX in a parent fragment <>
   return (
     <>
       {currentUser.role !== "ADMIN" ? (

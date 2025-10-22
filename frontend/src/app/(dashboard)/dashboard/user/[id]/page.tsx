@@ -29,7 +29,7 @@ export default function UserPage({
         });
 
         setUser(res.data);
-        console.log("user", res.data);
+        // console.log("user", res.data);
       } catch (err: any) {
         console.error("Error fetching user:", err.message);
         setError(err.message);

@@ -5,14 +5,14 @@ import { LoginFormData, SignupFormData, User } from "@/types";
 
 // Login API
 export const loginUser = createAsyncThunk<
-  { user: User; access_token: string },
-  LoginFormData,
-  { rejectValue: string }
+  { user: User; access_token: string }, //! return type
+  LoginFormData, //! argument type  
+  { rejectValue: string } //! rejection type
 >("auth/loginUser", async (data, { rejectWithValue }) => {
   try {
     const res = await axiosInstance.post("/auth/login", data);
 
-    console.log(" response from backend to login create async thuk: ",res.data);
+    // console.log(" response from backend to login create async thuk: ",res.data);
     return { user: res.data.user, access_token: res.data.access_token };
   } catch (err: any) {
     const message =

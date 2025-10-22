@@ -1,18 +1,6 @@
 "use client";
 
 import * as React from "react";
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavProjects } from "@/components/nav-projects";
@@ -29,145 +17,222 @@ import { Label } from "./ui/label";
 import Image from "next/image";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
+import {
+  Car,
+  BookOpen,
+  IndianRupeeIcon,
+  SquareTerminal,
+  Users,
+  Activity,
+  BarChart3,
+} from "lucide-react";
 
-
-
-// This is sample data.
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
-
+export const adminNavMain = {
   navMain: [
     {
-      title: "Playground",
-      url: "#",
+      title: "Admin Dashboard",
+      url: "http://localhost:3000/dashboard/admin",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "History",
-          url: "#",
+          title: "System Overview",
+          url: "http://localhost:3000/dashboard/admin/overview",
         },
         {
-          title: "Starred",
-          url: "#",
+          title: "User Analytics",
+          url: "http://localhost:3000/dashboard/admin/analytics",
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Activity Logs",
+          url: "http://localhost:3000/dashboard/admin/activity-logs",
+        },
+        {
+          title: "Platform Settings",
+          url: "http://localhost:3000/dashboard/admin/settings",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
+      title: "User Management",
+      url: "http://localhost:3000/dashboard/admin/users",
+      icon: Users,
       items: [
         {
-          title: "Genesis",
-          url: "#",
+          title: "View All Users",
+          url: "http://localhost:3000/dashboard/admin/users/view-all",
         },
         {
-          title: "Explorer",
-          url: "#",
+          title: "Add New User",
+          url: "http://localhost:3000/dashboard/admin/users/add",
         },
         {
-          title: "Quantum",
-          url: "#",
+          title: "User Activity",
+          url: "http://localhost:3000/dashboard/admin/users/activity",
+        },
+        {
+          title: "User Subscriptions",
+          url: "http://localhost:3000/dashboard/admin/users/subscriptions",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
+      title: "Trip Management",
+      url: "http://localhost:3000/dashboard/admin/trips",
+      icon: Car,
       items: [
         {
-          title: "Introduction",
-          url: "#",
+          title: "All User Trips",
+          url: "http://localhost:3000/dashboard/admin/trips/all",
         },
         {
-          title: "Get Started",
-          url: "#",
+          title: "Create New Trip",
+          url: "http://localhost:3000/dashboard/admin/trips/create",
         },
         {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
+          title: "Trip Reports",
+          url: "http://localhost:3000/dashboard/admin/trips/reports",
         },
       ],
     },
     {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
+      title: "Billing & Subscriptions",
+      url: "http://localhost:3000/dashboard/admin/billing",
+      icon: IndianRupeeIcon,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "All Transactions",
+          url: "http://localhost:3000/dashboard/admin/billing/transactions",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Manage Subscriptions",
+          url: "http://localhost:3000/dashboard/admin/billing/manage",
         },
         {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Revenue Insights",
+          url: "http://localhost:3000/dashboard/admin/billing/revenue",
         },
       ],
-    },
-  ],
-
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
     },
   ],
 };
 
+export const userNavMain = {
+  navMain: [
+    {
+      title: "Trip Management",
+      url: "http://localhost:3000/dashboard/trips",
+      icon: Car,
+      items: [
+        {
+          title: "Create New Trip",
+          url: "http://localhost:3000/dashboard/trips/create-trip",
+        },
+        {
+          title: "View All Trips",
+          url: "http://localhost:3000/dashboard/trips/view-all-trips",
+        },
+        {
+          title: "Trip Settings",
+          url: "http://localhost:3000/dashboard/trips/trip-settings",
+        },
+      ],
+    },
+    {
+      title: "Dashboard",
+      url: "http://localhost:3000/dashboard",
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "LeaderBoard",
+          url: "http://localhost:3000/dashboard/leaderboard",
+        },
+        {
+          title: "Activity Overview",
+          url: "http://localhost:3000/dashboard/activity-overview",
+        },
+        {
+          title: "Recent Actions",
+          url: "http://localhost:3000/dashboard/recent-actions",
+        },
+        {
+          title: "Profile Settings",
+          url: "http://localhost:3000/dashboard/profile-settings",
+        },
+      ],
+    },
+    {
+      title: "Rewards & Purchases",
+      url: "http://localhost:3000/dashboard/rewards",
+      icon: BookOpen,
+      items: [
+        {
+          title: "View Reward Points",
+          url: "http://localhost:3000/dashboard/rewards/points",
+        },
+        {
+          title: "Purchase History",
+          url: "http://localhost:3000/dashboard/rewards/history",
+        },
+        {
+          title: "Available Rewards",
+          url: "http://localhost:3000/dashboard/rewards/available",
+        },
+        {
+          title: "Redeem Reward",
+          url: "http://localhost:3000/dashboard/rewards/redeem",
+        },
+      ],
+    },
+    {
+      title: "Subscriptions & Billing",
+      url: "http://localhost:3000/dashboard/subscription",
+      icon: IndianRupeeIcon,
+      items: [
+        {
+          title: "Billing Information",
+          url: "http://localhost:3000/dashboard/subscription/billing",
+        },
+        {
+          title: "Usage Limits",
+          url: "http://localhost:3000/dashboard/subscription/limits",
+        },
+        {
+          title: "My Subscriptions",
+          url: "http://localhost:3000/dashboard/subscription/my-subscriptions",
+        },
+        {
+          title: "Subscription Settings",
+          url: "http://localhost:3000/dashboard/subscription/settings",
+        },
+      ],
+    },
+  ],
+};
+
+// projects: [
+//   {
+//     name: "Design Engineering",
+//     url: "#",
+//     icon: Frame,
+//   },
+//   {
+//     name: "Sales & Marketing",
+//     url: "#",
+//     icon: PieChart,
+//   },
+//   {
+//     name: "Travel",
+//     url: "#",
+//     icon: Map,
+//   },
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const currentUser = useSelector((state: RootState) => state.user.currentUser);
   if (!currentUser) return null;
+
+  const data = currentUser.role === "ADMIN" ? adminNavMain : userNavMain;
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -193,9 +258,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+        {/* <NavProjects projects={data.projects} /> */}
       </SidebarContent>
-
 
       <SidebarFooter>
         <NavUser user={currentUser} />

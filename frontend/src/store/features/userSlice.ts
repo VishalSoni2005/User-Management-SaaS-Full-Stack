@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { getAccessToken } from "@/lib/get-access-toke.lib";
 import { UpdateUser, User, UserState } from "@/types/user.type";
 import { axiosInstance } from "@/api/axiosInstance";
+import { API_ENDPOINT } from "@/constants/API_ENDPOINTS";
 
 const initialState: UserState = {
   users: [],
@@ -22,9 +24,9 @@ export const fetchAllUsers = createAsyncThunk<
 >("user/fetchAllUsers", async ({ limit, page }, { rejectWithValue }) => {
   try {
     const token = getAccessToken();
-    const res = await axios.get(
-      `http://localhost:4000/users/getallusers?limit=${limit}&page=${page}`,
-      // API_ENDPOINT.GET_ALL_USERS,
+    const res = await axiosInstance.get(
+      `/users/getallusers?limit=${limit}&page=${page}`,
+      // API_ENDPOINT.GET_ALL_USERS/`?limit=${limit}&page=${page}`,
       {
         headers: token ? { Authorization: `Bearer ${token}` } : undefined, //* token going from here is access token
       }
@@ -35,6 +37,7 @@ export const fetchAllUsers = createAsyncThunk<
       total: res.data.meta.total,
       page: res.data.meta.page,
       totalPages: res.data.meta.totalPages,
+      meta: res.data.meta,
     };
   } catch (err: any) {
     const message =

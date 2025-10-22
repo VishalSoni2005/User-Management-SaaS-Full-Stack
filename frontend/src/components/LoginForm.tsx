@@ -52,14 +52,13 @@ export function LoginForm() {
 
       localStorage.setItem("access_token", res.access_token);
 
-      const payload = getPayload();
+      const payload = getPayload(); //! here we are seting current user in redux store
 
       // Set user in Redux userSlice
       if (payload) dispatch(setCurrentUser(payload));
 
       router.push("/dashboard");
     } catch (err: any) {
-      // Handle errors
       console.error("Login failed:", err);
       if (typeof err === "string") {
         setServerError(err);

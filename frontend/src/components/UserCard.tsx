@@ -26,7 +26,7 @@ export default function UserCard({ user }: { user: User }) {
     setHasChanged(true);
   };
 
-  console.log("User From UserCard", user);
+  // console.log("User From UserCard", user);
 
   const handleSave = () => {
     console.log("Saving updated user:", editedUser);
